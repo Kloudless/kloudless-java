@@ -81,6 +81,20 @@ public abstract class APIResourceMixin extends APIResource {
 		}
 		return GSON.fromJson(rBody, clazz);
 	}
+	
+	// Update Mixin
+	protected static <T> T update(String path, Map<String, Object> params,
+			Class<T> clazz, String apiKey) throws APIException,
+			AuthenticationException, InvalidRequestException,
+			APIConnectionException {
+		KloudlessResponse response = request(RequestMethod.PUT, path, params, apiKey);
+		int rCode = response.responseCode;
+		String rBody = response.responseBody;
+		if (rCode < 200 || rCode >= 300) {
+			handleAPIError(rBody, rCode);
+		}
+		return GSON.fromJson(rBody, clazz);
+	}
 
 	// Delete Mixin
 	protected static KloudlessResponse delete(String path,

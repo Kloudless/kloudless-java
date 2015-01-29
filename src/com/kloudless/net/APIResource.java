@@ -221,7 +221,6 @@ public abstract class APIResource extends KloudlessObject {
 		OutputStream output = null;
 		try {
 			output = conn.getOutputStream();
-			System.out.println(GSON.toJson(params));
 			output.write(GSON.toJson(params).getBytes());
 		} finally {
 			if (output != null) {
@@ -230,6 +229,26 @@ public abstract class APIResource extends KloudlessObject {
 		}
 		return conn;
 	}
+	
+	private static javax.net.ssl.HttpsURLConnection createPutConnection(
+			String url, Map<String, Object> params, String query, String apiKey)
+			throws IOException {
+		javax.net.ssl.HttpsURLConnection conn = createKloudlessConnection(url,
+				apiKey);
+		conn.setDoOutput(true);
+		conn.setRequestMethod("PUT");
+		OutputStream output = null;
+		// put in body the data for a PUT
+		try {
+			output = conn.getOutputStream();
+			output.write((byte[]) params.get("body"));
+		} finally {
+			if (output != null) {
+				output.close();
+			}
+		}
+		return conn;
+	}	
 
 	private static javax.net.ssl.HttpsURLConnection createPostConnection(
 			String url, Map<String, Object> params, String query, String apiKey)
@@ -271,10 +290,10 @@ public abstract class APIResource extends KloudlessObject {
 
 			} else {
 				conn.setRequestProperty("Content-Type", String
-						.format("application/x-www-form-urlencoded;charset=%s",
+						.format("application/json;charset=%s",
 								CHARSET));
 				output = conn.getOutputStream();
-				output.write(query.getBytes(CHARSET));
+				output.write(GSON.toJson(params).getBytes());
 			}
 		} finally {
 			if (output != null) {
@@ -373,8 +392,6 @@ public abstract class APIResource extends KloudlessObject {
 		String rBody = byteArrayOut.toString(CHARSET);
 		responseStream.close();
 
-		System.out.println(rBody);
-
 		return rBody;
 	}
 
@@ -390,6 +407,9 @@ public abstract class APIResource extends KloudlessObject {
 				break;
 			case PATCH:
 				conn = createPatchConnection(url, params, query, apiKey);
+				break;
+			case PUT:
+				conn = createPutConnection(url, params, query, apiKey);
 				break;
 			case POST:
 				conn = createPostConnection(url, params, query, apiKey);

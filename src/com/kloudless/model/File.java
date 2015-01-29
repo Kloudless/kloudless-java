@@ -117,6 +117,30 @@ public class File extends Metadata {
 	}
 
 	/**
+	 * Makes a Kloudless API request to update contents of a file.  The contents
+	 * are placed in the body
+	 * 
+	 * @param id
+	 * @param accountId
+	 * @param params - The parameters include:
+	 * 		- body - byte array of file
+	 * @return File
+	 * @throws APIException
+	 * @throws AuthenticationException
+	 * @throws InvalidRequestException
+	 * @throws APIConnectionException
+	 */
+	public static File update(String id, String accountId, Map<String, Object> params)
+			throws APIException, AuthenticationException,
+			InvalidRequestException, APIConnectionException {
+
+		String path = String.format("%s/%s",
+				instanceURL(Account.class, accountId),
+				instanceURL(File.class, id));
+		return update(path, params, File.class, null);
+	}
+	
+	/**
 	 * Makes a Kloudless API request to delete a file. Returns a success or false within the
 	 * KloudlessResponse object.
 	 * 
@@ -139,4 +163,32 @@ public class File extends Metadata {
 		return delete(path, params, null);
 	}
 
+	/**
+	 * Makes a Kloudless API request to copy a file.
+	 * 
+	 * @param id - the account id or comma separated account ids.
+	 * @param params - query parameters
+	 * @return MetadataCollection
+	 * @throws APIException
+	 * @throws AuthenticationException
+	 * @throws InvalidRequestException
+	 * @throws APIConnectionException
+	 */
+	public static File copy(String id, String accountId, Map<String, Object> params) throws APIException,
+			AuthenticationException, InvalidRequestException,
+			APIConnectionException {
+		String path = String.format("%s/%s/copy",
+				instanceURL(Account.class, accountId),
+				instanceURL(File.class, id));
+		KloudlessResponse response = request(RequestMethod.POST, path, params,
+				null);
+
+		int rCode = response.getResponseCode();
+		String rBody = response.getResponseBody();
+		if (rCode < 200 || rCode >= 300) {
+			handleAPIError(rBody, rCode);
+		}
+		return GSON.fromJson(rBody, File.class);
+	}	
+	
 }
