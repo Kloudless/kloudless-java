@@ -42,15 +42,7 @@ public abstract class APIResource extends KloudlessObject {
 	protected static String className(Class<?> clazz) {
 		String className = clazz.getSimpleName().toLowerCase()
 				.replace("$", " ");
-
-		// TODO: Delurk this, with invoiceitem being a valid url, we can't get
-		// too
-		// fancy yet.
-		if (className.equals("applicationfee")) {
-			return "application_fee";
-		} else {
-			return className;
-		}
+		return className;
 	}
 
 	protected static String singleClassURL(Class<?> clazz) {
@@ -640,11 +632,22 @@ public abstract class APIResource extends KloudlessObject {
 			fetchMethod.setAccessible(true);
 			Object response = fetchMethod.invoke(urlFetchService, request);
 
+			// TODO: Convert headers and populate fields.
+			//List<Object> headersList = (List<Object>) response.getClass()
+			//        .getDeclaredMethod("getHeaders").invoke(response);
+			Map<String, List<String>> headers = new HashMap<String, List<String>>();
+
 			int responseCode = (Integer) response.getClass()
-					.getDeclaredMethod("getResponseCode").invoke(response);
-			String body = new String((byte[]) response.getClass()
-					.getDeclaredMethod("getContent").invoke(response), CHARSET);
-			return new KloudlessResponse(responseCode, body);
+			        .getDeclaredMethod("getResponseCode").invoke(response);
+
+			byte[] responseBytes = (byte[]) response.getClass()
+			        .getDeclaredMethod("getContent").invoke(response);
+			String body = new String(responseBytes, CHARSET);
+			ByteArrayOutputStream responseStream = new ByteArrayOutputStream(
+			        responseBytes.length);
+			responseStream.write(responseBytes, 0, responseBytes.length);
+
+			return new KloudlessResponse(responseCode, body, headers, responseStream);
 		} catch (InvocationTargetException e) {
 			throw new APIException(unknownErrorMessage, e);
 		} catch (MalformedURLException e) {
