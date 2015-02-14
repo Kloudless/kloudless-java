@@ -3,7 +3,7 @@ package com.kloudless;
 public abstract class Kloudless {
 
 	public static final String BASE_URL = "https://api.kloudless.com";
-	public static final String VERSION = "0.0.1";
+	public static final String VERSION = "0.1.0";
 	public static String apiKey = null;
 	public static String accountId = null;
 	public static String accountKey = null;
