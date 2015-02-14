@@ -25,7 +25,9 @@ See [KloudlessTest.java](https://github.com/Kloudless/kloudless-java/blob/master
 Building
 ==========
 
-You can create the jar, skipping tests, with `mvn install -DskipTests`.
+* You can create the jar, skipping tests, with `mvn install -DskipTests`.
+* You can gather dependencies for easy installation/deployment with `mvn dependency:copy-dependencies`.
+  They will be located in `target/dependencies`.
 
 Testing
 =======
