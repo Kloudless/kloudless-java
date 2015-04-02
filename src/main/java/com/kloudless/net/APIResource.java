@@ -613,13 +613,18 @@ public abstract class APIResource extends KloudlessObject {
 				//look at createQuery.
 				requestClass.getDeclaredMethod("setPayload", byte[].class)
 						.invoke(request, GSON.toJson(params).getBytes());
+				extraHeaders.put("Content-Type", String
+						.format("application/json;charset=%s",
+								CHARSET));
 
 			} else {
 				requestClass.getDeclaredMethod("setPayload", byte[].class)
 						.invoke(request, query.getBytes());
 			}
 
-			for (Map.Entry<String, String> header : getHeaders(apiKey).entrySet()) {
+			Map<String, String> finalHeaders = getHeaders(apiKey);
+			finalHeaders.putAll(extraHeaders);
+			for (Map.Entry<String, String> header : finalHeaders.entrySet()) {
 				Class<?> httpHeaderClass = Class
 						.forName("com.google.appengine.api.urlfetch.HTTPHeader");
 				Object reqHeader = httpHeaderClass.getDeclaredConstructor(
