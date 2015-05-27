@@ -529,7 +529,8 @@ public abstract class APIResource extends KloudlessObject {
 			String appEngineEnv = System.getProperty(
 					"com.google.appengine.runtime.environment", null);
 			if (appEngineEnv != null) {
-				response = makeAppEngineRequest(method, url, query, apiKey);
+				response = makeAppEngineRequest(method, params, url, query,
+						apiKey);
 			} else {
 				// non-appengine ClassCastException
 				throw ce;
@@ -561,7 +562,7 @@ public abstract class APIResource extends KloudlessObject {
 	 * maintain AppEngine-specific JAR
 	 */
 	private static KloudlessResponse makeAppEngineRequest(RequestMethod method,
-			String url, String query, String apiKey) throws APIException {
+														  Map<String, Object> params, String url, String query, String apiKey) throws APIException {
 		String unknownErrorMessage = "Sorry, an unknown error occurred while trying to use the "
 				+ "Google App Engine runtime. Please contact support@kloudless.com for assistance.";
 		try {
@@ -606,19 +607,30 @@ public abstract class APIResource extends KloudlessObject {
 					requestMethodClass, fetchOptionsClass).newInstance(
 					fetchURL, httpMethod, fetchOptions);
 
-			if (method == RequestMethod.POST) {
+			Map<String, String> extraHeaders = new HashMap<String, String>();
+			if (query == null || query.length() == 0) {
+				//This is a request that uses a json paylaod to make a request.
+				//look at createQuery.
+				requestClass.getDeclaredMethod("setPayload", byte[].class)
+						.invoke(request, GSON.toJson(params).getBytes());
+				extraHeaders.put("Content-Type", String
+						.format("application/json;charset=%s",
+								CHARSET));
+
+			} else {
 				requestClass.getDeclaredMethod("setPayload", byte[].class)
 						.invoke(request, query.getBytes());
 			}
 
-			for (Map.Entry<String, String> header : getHeaders(apiKey)
-					.entrySet()) {
+			Map<String, String> finalHeaders = getHeaders(apiKey);
+			finalHeaders.putAll(extraHeaders);
+			for (Map.Entry<String, String> header : finalHeaders.entrySet()) {
 				Class<?> httpHeaderClass = Class
 						.forName("com.google.appengine.api.urlfetch.HTTPHeader");
 				Object reqHeader = httpHeaderClass.getDeclaredConstructor(
 						String.class, String.class).newInstance(
 						header.getKey(), header.getValue());
-				requestClass.getDeclaredMethod("setHeader", httpHeaderClass)
+				requestClass.getDeclaredMethod("addHeader", httpHeaderClass)
 						.invoke(request, reqHeader);
 			}
 
