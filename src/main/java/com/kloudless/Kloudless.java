@@ -1,5 +1,8 @@
 package com.kloudless;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class Kloudless {
 
 	public static final String BASE_URL = "https://api.kloudless.com";
@@ -8,6 +11,7 @@ public abstract class Kloudless {
 	public static String accountId = null;
 	public static String accountKey = null;
 	public static String apiVersion = "0";
+	public static Map<String, String> customHeaders = new HashMap<String, String>();
 
 	private static String apiBase = BASE_URL;
 
@@ -21,6 +25,10 @@ public abstract class Kloudless {
 
 	public static String getApiBase() {
 		return apiBase;
+	}
+
+	public static void addCustomHeaders(Map<String, String> headers) {
+		customHeaders.putAll(headers);
 	}
 
 }

@@ -2,6 +2,7 @@ package com.kloudless;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -22,15 +23,25 @@ import com.kloudless.model.KeyCollection;
 import com.kloudless.model.Link;
 import com.kloudless.model.LinkCollection;
 import com.kloudless.model.MetadataCollection;
-import com.kloudless.net.KloudlessResponse;
 
 public class KloudlessTest {
 
 	static Gson GSON = new GsonBuilder().create();
+	static ArrayList<String> testAccounts = new ArrayList<String>();
 
 	@BeforeClass
 	public static void setUp() {
 		Kloudless.apiKey = "INSERT API KEY HERE";
+
+		// Override API Base, now works with http
+//		Kloudless.overrideApiBase("http://localhost:8002");
+
+		// Insert Custom Headers
+		HashMap<String, String> customHeaders = new HashMap<String, String>();
+		Kloudless.addCustomHeaders(customHeaders);
+
+		// Add Test Accounts
+//		testAccounts.add("INSERT TEST ACCOUNTS HERE");
 	}
 
 	// Begin Account Tests
@@ -42,8 +53,10 @@ public class KloudlessTest {
 
 	@Test
 	public void testAccountRetrieve() throws KloudlessException {
-		Account account = Account.retrieve("1", null);
-		System.out.println(account);
+		for (String testAccount : testAccounts) {
+			Account account = Account.retrieve(testAccount, null);
+			System.out.println(account);
+		}
 	}
 
 	@Test
@@ -56,59 +69,64 @@ public class KloudlessTest {
 		HashMap<String, Object> params = new HashMap<String, Object>();
 		params.put("q", "test");
 
-		MetadataCollection results = Account.search("1", params);
-		System.out.println(results);
+		for (String testAccount : testAccounts) {
+			MetadataCollection results = Account.search(testAccount, params);
+			System.out.println(results);
+		}
 	}
 
 	@Test
 	public void testAccountRecent() throws KloudlessException {
-		FileCollection results = Account.recent("1", null);
-		System.out.println(results);
+		for (String testAccount : testAccounts) {
+			FileCollection results = Account.recent(testAccount, null);
+			System.out.println(results);
+		}
 	}
 
 	@Test
 	public void testAccountEvents() throws KloudlessException {
-		EventCollection events = Account.events("1", null);
-		System.out.println(events);
-
 		HashMap<String, Object> params = new HashMap<String, Object>();
-		params.put("cursor", "9190");
-		events = Account.events("1", params);
-		System.out.println(events);
+//		params.put("cursor", "after-auth");
+		for (String testAccount : testAccounts) {
+			EventCollection events = Account.events(testAccount, null);
+			System.out.println(events);
+
+			events = Account.events(testAccount, params);
+			System.out.println(events);
+		}
 	}
 
 	// Begin AccountKey Tests
 	@Test
 	public void testAccountKeyAll() throws KloudlessException {
-		KeyCollection keys = Key.all("1", null);
-		System.out.println(keys);
+		for (String testAccount : testAccounts) {
+			KeyCollection keys = Key.all(testAccount, null);
+			System.out.println(keys);
+		}
 	}
 
 	@Test
 	public void testAccountKeyRetrieve() throws KloudlessException {
-		Key key = Key.retrieve("12666", "1", null);
-		System.out.println(key);
+		// TODO: add accountkey retrieval test
 	}
 
 	// Begin Folder Tests
 	@Test
 	public void testFolderContents() throws KloudlessException {
-		MetadataCollection contents = Folder.contents("root", "4", null);
-		System.out.println(contents);
+		for (String testAccount : testAccounts) {
+			MetadataCollection contents = Folder.contents("root", testAccount, null);
+			System.out.println(contents);
+		}
 	}
 
 	@Test
 	public void testFolderRetrieve() throws KloudlessException {
-		Folder folderInfo = Folder.retrieve("fL2E=", "4", null);
-		System.out.println(folderInfo);
+		// TODO: add folderRetrieval test
 	}
 
 	@Test
 	public void testFolderSave() throws KloudlessException {
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		params.put("name", "a");
-		Folder folderInfo = Folder.save("fL2E=", "4", params);
-		System.out.println(folderInfo);
+		// TODO: add folderSave test
 	}
 
 	@Test
@@ -116,8 +134,11 @@ public class KloudlessTest {
 		HashMap<String, Object> params = new HashMap<String, Object>();
 		params.put("name", "new new folder");
 		params.put("parent_id", "root");
-		Folder folderInfo = Folder.create("4", params);
-		System.out.println(folderInfo);
+
+		for (String testAccount : testAccounts) {
+			Folder folderInfo = Folder.create(testAccount, params);
+			System.out.println(folderInfo);
+		}
 	}
 
 	@Test
@@ -128,8 +149,8 @@ public class KloudlessTest {
 	// Begin File Tests
 	@Test
 	public void testFileContents() throws KloudlessException, IOException {
-		KloudlessResponse response = File.contents(
-				"fL3N1cHBvcnQtc2FsZXNmb3JjZS5wbmc\u003d", "4", null);
+//		KloudlessResponse response = File.contents(
+//				"fL3N1cHBvcnQtc2FsZXNmb3JjZS5wbmc\u003d", "4", null);
 
 		// For Binary Data
 //		String path = "SOME OUTPUT PATH";
@@ -140,25 +161,21 @@ public class KloudlessTest {
 
 		// For String Data
 //		String path = "SOME OUTPUT PATH";
-		String contents = response.getResponseBody();
+//		String contents = response.getResponseBody();
 //		PrintWriter writer = new PrintWriter(path);
 //		writer.print(contents);
 //		writer.close();
-		System.out.println(contents);
+//		System.out.println(contents);
 	}
 
 	@Test
 	public void testFileRetrieve() throws KloudlessException {
-		File fileInfo = File.retrieve("fL3Rlc3QgKDE2KS50eHQ\u003d", "4", null);
-		System.out.println(fileInfo);
+		// TODO: add fileRetrieve test
 	}
 
 	@Test
 	public void testFileSave() throws KloudlessException {
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		params.put("name", "test (16).txt");
-		File fileInfo = File.save("fL3Rlc3QgKDE2KS50eHQ\u003d", "4", params);
-		System.out.println(fileInfo);
+		// TODO: add fileSave test
 	}
 
 	@Test
@@ -181,11 +198,12 @@ public class KloudlessTest {
 		metadata.put("parent_id", "root");
 		params.put("metadata", GSON.toJson(metadata));
 		params.put("file", contents.getBytes());
-
 		System.out.println(params);
 
-		File fileInfo = File.create("4", params);
-		System.out.println(fileInfo);
+		for (String testAccount : testAccounts) {
+			File fileInfo = File.create(testAccount, params);
+			System.out.println(fileInfo);
+		}
 	}
 
 	@Test
@@ -196,30 +214,25 @@ public class KloudlessTest {
 	// Begin Link Tests
 	@Test
 	public void testLinkAll() throws KloudlessException {
-		LinkCollection links = Link.all("2", null);
-		System.out.println(links);
+		for (String testAccount : testAccounts) {
+			LinkCollection links = Link.all(testAccount, null);
+			System.out.println(links);
+		}
 	}
 
 	@Test
 	public void testLinkRetrieve() throws KloudlessException {
-		Link linkInfo = Link.retrieve("iywSjUZMos2_M_HTHpJU", "2", null);
-		System.out.println(linkInfo);
+		// TODO: figure out how to test retrieve a created link
 	}
 
 	@Test
 	public void testLinkSave() throws KloudlessException {
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		params.put("active", false);
-		Link linkInfo = Link.save("iywSjUZMos2_M_HTHpJU", "2", params);
-		System.out.println(linkInfo);
+		// TODO: figure out how to test save a created link
 	}
 
 	@Test
 	public void testLinkCreate() throws KloudlessException {
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		params.put("file_id", "fL3Rlc3QtZHJvcGJveC5wbmc\u003d");
-		Link linkInfo = Link.create("4", params);
-		System.out.println(linkInfo);
+		// TODO: figure out how to test create a link
 	}
 
 	@Test

@@ -27,7 +27,7 @@ public class KloudlessEventsTest {
 	@BeforeClass
 	public static void setUp() {
 		Kloudless.apiKey = "INSERT API KEY HERE";
-		
+
 		// Google Drive
 //		accounts.add("1");
 		// OneDrive

@@ -147,7 +147,7 @@ public abstract class APIResource extends KloudlessObject {
 		return headers;
 	}
 
-	private static javax.net.ssl.HttpsURLConnection createKloudlessConnection(
+	private static java.net.HttpURLConnection createKloudlessConnection(
 			String url, String apiKey) throws IOException {
 		URL kloudlessURL = null;
 		String customURLStreamHandlerClassName = System.getProperty(
@@ -180,8 +180,13 @@ public abstract class APIResource extends KloudlessObject {
 		} else {
 			kloudlessURL = new URL(url);
 		}
-		javax.net.ssl.HttpsURLConnection conn = (javax.net.ssl.HttpsURLConnection) kloudlessURL
-				.openConnection();
+		java.net.HttpURLConnection conn;
+		if (url.startsWith("https://")) {
+			conn = (javax.net.ssl.HttpsURLConnection) kloudlessURL
+					.openConnection();
+		} else {
+			conn = (java.net.HttpURLConnection) kloudlessURL.openConnection();
+		}
 		conn.setConnectTimeout(30 * 1000);
 		conn.setReadTimeout(80 * 1000);
 		conn.setUseCaches(false);
@@ -189,22 +194,27 @@ public abstract class APIResource extends KloudlessObject {
 			conn.setRequestProperty(header.getKey(), header.getValue());
 		}
 
+		// custom headers
+		for (Map.Entry<String, String> header : Kloudless.customHeaders.entrySet()) {
+			conn.setRequestProperty(header.getKey(), header.getValue());
+		}
+
 		return conn;
 	}
 
-	private static javax.net.ssl.HttpsURLConnection createGetConnection(
+	private static java.net.HttpURLConnection createGetConnection(
 			String url, String query, String apiKey) throws IOException {
 		String getURL = String.format("%s?%s", url, query);
-		javax.net.ssl.HttpsURLConnection conn = createKloudlessConnection(
+		java.net.HttpURLConnection conn = createKloudlessConnection(
 				getURL, apiKey);
 		conn.setRequestMethod("GET");
 		return conn;
 	}
 
-	private static javax.net.ssl.HttpsURLConnection createPatchConnection(
+	private static java.net.HttpURLConnection createPatchConnection(
 			String url, Map<String, Object> params, String query, String apiKey)
 			throws IOException {
-		javax.net.ssl.HttpsURLConnection conn = createKloudlessConnection(url,
+		java.net.HttpURLConnection conn = createKloudlessConnection(url,
 				apiKey);
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
@@ -222,10 +232,10 @@ public abstract class APIResource extends KloudlessObject {
 		return conn;
 	}
 	
-	private static javax.net.ssl.HttpsURLConnection createPutConnection(
+	private static java.net.HttpURLConnection createPutConnection(
 			String url, Map<String, Object> params, String query, String apiKey)
 			throws IOException {
-		javax.net.ssl.HttpsURLConnection conn = createKloudlessConnection(url,
+		java.net.HttpURLConnection conn = createKloudlessConnection(url,
 				apiKey);
 		conn.setDoOutput(true);
 		conn.setRequestMethod("PUT");
@@ -242,10 +252,10 @@ public abstract class APIResource extends KloudlessObject {
 		return conn;
 	}	
 
-	private static javax.net.ssl.HttpsURLConnection createPostConnection(
+	private static java.net.HttpURLConnection createPostConnection(
 			String url, Map<String, Object> params, String query, String apiKey)
 			throws IOException {
-		javax.net.ssl.HttpsURLConnection conn = createKloudlessConnection(url,
+		java.net.HttpURLConnection conn = createKloudlessConnection(url,
 				apiKey);
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
@@ -295,10 +305,10 @@ public abstract class APIResource extends KloudlessObject {
 		return conn;
 	}
 
-	private static javax.net.ssl.HttpsURLConnection createDeleteConnection(
+	private static java.net.HttpURLConnection createDeleteConnection(
 			String url, String query, String apiKey) throws IOException {
 		String deleteUrl = String.format("%s?%s", url, query);
-		javax.net.ssl.HttpsURLConnection conn = createKloudlessConnection(
+		java.net.HttpURLConnection conn = createKloudlessConnection(
 				deleteUrl, apiKey);
 		conn.setRequestMethod("DELETE");
 		return conn;
@@ -391,7 +401,8 @@ public abstract class APIResource extends KloudlessObject {
 			APIResource.RequestMethod method, Map<String, Object> params,
 			String url, String query, String apiKey)
 			throws APIConnectionException {
-		javax.net.ssl.HttpsURLConnection conn = null;
+		java.net.HttpURLConnection conn = null;
+
 		try {
 			switch (method) {
 			case GET:
@@ -562,7 +573,8 @@ public abstract class APIResource extends KloudlessObject {
 	 * maintain AppEngine-specific JAR
 	 */
 	private static KloudlessResponse makeAppEngineRequest(RequestMethod method,
-														  Map<String, Object> params, String url, String query, String apiKey) throws APIException {
+			Map<String, Object> params, String url, String query, String apiKey)
+			throws APIException {
 		String unknownErrorMessage = "Sorry, an unknown error occurred while trying to use the "
 				+ "Google App Engine runtime. Please contact support@kloudless.com for assistance.";
 		try {
@@ -607,30 +619,38 @@ public abstract class APIResource extends KloudlessObject {
 					requestMethodClass, fetchOptionsClass).newInstance(
 					fetchURL, httpMethod, fetchOptions);
 
-			Map<String, String> extraHeaders = new HashMap<String, String>();
+			Map<String, String> extraHeaders = getHeaders(apiKey);
 			if (query == null || query.length() == 0) {
-				//This is a request that uses a json paylaod to make a request.
+				//This is a request that uses a json payload to make a request.
 				//look at createQuery.
 				requestClass.getDeclaredMethod("setPayload", byte[].class)
 						.invoke(request, GSON.toJson(params).getBytes());
 				extraHeaders.put("Content-Type", String
 						.format("application/json;charset=%s",
 								CHARSET));
-
 			} else {
 				requestClass.getDeclaredMethod("setPayload", byte[].class)
 						.invoke(request, query.getBytes());
 			}
 
-			Map<String, String> finalHeaders = getHeaders(apiKey);
-			finalHeaders.putAll(extraHeaders);
-			for (Map.Entry<String, String> header : finalHeaders.entrySet()) {
+			for (Map.Entry<String, String> header : extraHeaders.entrySet()) {
 				Class<?> httpHeaderClass = Class
 						.forName("com.google.appengine.api.urlfetch.HTTPHeader");
 				Object reqHeader = httpHeaderClass.getDeclaredConstructor(
 						String.class, String.class).newInstance(
 						header.getKey(), header.getValue());
 				requestClass.getDeclaredMethod("addHeader", httpHeaderClass)
+						.invoke(request, reqHeader);
+			}
+
+			// custom headers
+			for (Map.Entry<String, String> header : Kloudless.customHeaders.entrySet()) {
+				Class<?> httpHeaderClass = Class
+						.forName("com.google.appengine.api.urlfetch.HTTPHeader");
+				Object reqHeader = httpHeaderClass.getDeclaredConstructor(
+						String.class, String.class).newInstance(
+						header.getKey(), header.getValue());
+				requestClass.getDeclaredMethod("setHeader", httpHeaderClass)
 						.invoke(request, reqHeader);
 			}
 
