@@ -110,24 +110,30 @@ public abstract class APIResource extends KloudlessObject {
 		return String.format("%s=%s", urlEncode(k), urlEncode(v));
 	}
 
-	static Map<String, String> getHeaders(String apiKey) {
+	static Map<String, String> getHeaders(Map<String, String> keys) {
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("Accept-Charset", CHARSET);
 		headers.put("User-Agent", String.format("Kloudless/v1 JavaBindings/%s",
 				Kloudless.VERSION));
 
-		if (apiKey == null) {
-			apiKey = Kloudless.apiKey;
+		if (keys.get("apiKey") == null) {
+			keys.put("apiKey", Kloudless.apiKey);
+		}
+		
+		if (keys.get("developerKey") == null) {
+			keys.put("developerKey", Kloudless.developerKey);
 		}
 
-		if (apiKey != null) {
-			headers.put("Authorization", String.format("ApiKey %s", apiKey));
-		} else {
-			if (Kloudless.accountId != null && Kloudless.accountKey != null) {
+		if (keys.get("apiKey") != null) {
+			headers.put("Authorization", String.format("ApiKey %s", keys.get("apiKey")));
+		} else if (Kloudless.accountId != null && Kloudless.accountKey != null) {
 				headers.put("Authorization",
 						String.format("AccountKey %s", Kloudless.accountKey));
-			}
+		} else if (keys.get("developerKey") != null) {
+			headers.put("Authorization",
+					String.format("DeveloperKey %s", keys.get("developerKey")));
 		}
+	
 
 		// debug headers
 		String[] propertyNames = { "os.name", "os.version", "os.arch",
@@ -148,7 +154,7 @@ public abstract class APIResource extends KloudlessObject {
 	}
 
 	private static java.net.HttpURLConnection createKloudlessConnection(
-			String url, String apiKey) throws IOException {
+			String url, Map<String, String> keys) throws IOException {
 		URL kloudlessURL = null;
 		String customURLStreamHandlerClassName = System.getProperty(
 				CUSTOM_URL_STREAM_HANDLER_PROPERTY_NAME, null);
@@ -190,7 +196,7 @@ public abstract class APIResource extends KloudlessObject {
 		conn.setConnectTimeout(30 * 1000);
 		conn.setReadTimeout(80 * 1000);
 		conn.setUseCaches(false);
-		for (Map.Entry<String, String> header : getHeaders(apiKey).entrySet()) {
+		for (Map.Entry<String, String> header : getHeaders(keys).entrySet()) {
 			conn.setRequestProperty(header.getKey(), header.getValue());
 		}
 
@@ -203,19 +209,19 @@ public abstract class APIResource extends KloudlessObject {
 	}
 
 	private static java.net.HttpURLConnection createGetConnection(
-			String url, String query, String apiKey) throws IOException {
+			String url, String query, Map<String, String> keys) throws IOException {
 		String getURL = String.format("%s?%s", url, query);
 		java.net.HttpURLConnection conn = createKloudlessConnection(
-				getURL, apiKey);
+				getURL, keys);
 		conn.setRequestMethod("GET");
 		return conn;
 	}
 
 	private static java.net.HttpURLConnection createPatchConnection(
-			String url, Map<String, Object> params, String query, String apiKey)
+			String url, Map<String, Object> params, String query, Map<String, String> keys)
 			throws IOException {
 		java.net.HttpURLConnection conn = createKloudlessConnection(url,
-				apiKey);
+				keys);
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
 		conn.setRequestProperty("Content-Type", "application/json");
@@ -233,10 +239,10 @@ public abstract class APIResource extends KloudlessObject {
 	}
 	
 	private static java.net.HttpURLConnection createPutConnection(
-			String url, Map<String, Object> params, String query, String apiKey)
+			String url, Map<String, Object> params, String query, Map<String, String> keys)
 			throws IOException {
 		java.net.HttpURLConnection conn = createKloudlessConnection(url,
-				apiKey);
+				keys);
 		conn.setDoOutput(true);
 		conn.setRequestMethod("PUT");
 		OutputStream output = null;
@@ -253,10 +259,10 @@ public abstract class APIResource extends KloudlessObject {
 	}	
 
 	private static java.net.HttpURLConnection createPostConnection(
-			String url, Map<String, Object> params, String query, String apiKey)
+			String url, Map<String, Object> params, String query, Map<String, String> keys)
 			throws IOException {
 		java.net.HttpURLConnection conn = createKloudlessConnection(url,
-				apiKey);
+				keys);
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
 
@@ -306,10 +312,10 @@ public abstract class APIResource extends KloudlessObject {
 	}
 
 	private static java.net.HttpURLConnection createDeleteConnection(
-			String url, String query, String apiKey) throws IOException {
+			String url, String query, Map<String, String> keys) throws IOException {
 		String deleteUrl = String.format("%s?%s", url, query);
 		java.net.HttpURLConnection conn = createKloudlessConnection(
-				deleteUrl, apiKey);
+				deleteUrl, keys);
 		conn.setRequestMethod("DELETE");
 		return conn;
 	}
@@ -399,26 +405,26 @@ public abstract class APIResource extends KloudlessObject {
 
 	private static KloudlessResponse makeURLConnectionRequest(
 			APIResource.RequestMethod method, Map<String, Object> params,
-			String url, String query, String apiKey)
+			String url, String query, Map<String, String> keys)
 			throws APIConnectionException {
 		java.net.HttpURLConnection conn = null;
 
 		try {
 			switch (method) {
 			case GET:
-				conn = createGetConnection(url, query, apiKey);
+				conn = createGetConnection(url, query, keys);
 				break;
 			case PATCH:
-				conn = createPatchConnection(url, params, query, apiKey);
+				conn = createPatchConnection(url, params, query, keys);
 				break;
 			case PUT:
-				conn = createPutConnection(url, params, query, apiKey);
+				conn = createPutConnection(url, params, query, keys);
 				break;
 			case POST:
-				conn = createPostConnection(url, params, query, apiKey);
+				conn = createPostConnection(url, params, query, keys);
 				break;
 			case DELETE:
-				conn = createDeleteConnection(url, query, apiKey);
+				conn = createDeleteConnection(url, query, keys);
 				break;
 			default:
 				throw new APIConnectionException(
@@ -461,7 +467,7 @@ public abstract class APIResource extends KloudlessObject {
 
 	protected static KloudlessResponse request(
 			APIResource.RequestMethod method, String path,
-			Map<String, Object> params, String apiKey)
+			Map<String, Object> params, Map<String, String> keys)
 			throws AuthenticationException, InvalidRequestException,
 			APIConnectionException, APIException {
 		String originalDNSCacheTTL = null;
@@ -480,7 +486,7 @@ public abstract class APIResource extends KloudlessObject {
 		}
 
 		try {
-			return _request(method, path, params, apiKey);
+			return _request(method, path, params, keys);
 		} finally {
 			if (allowedToSetTTL) {
 				if (originalDNSCacheTTL == null) {
@@ -498,25 +504,38 @@ public abstract class APIResource extends KloudlessObject {
 
 	protected static KloudlessResponse _request(
 			APIResource.RequestMethod method, String path,
-			Map<String, Object> params, String apiKey)
+			Map<String, Object> params, Map<String, String> keys) //Map<String, String> keys to have the .length() method
 			throws AuthenticationException, InvalidRequestException,
 			APIConnectionException, APIException {
+		
+		if (keys == null) {
+			keys = new HashMap<String, String>();
+		}
+		
 		if ((Kloudless.apiKey == null || Kloudless.apiKey.length() == 0)
-				&& (apiKey == null || apiKey.length() == 0)
+				&& (keys.get("apiKey") == null || keys.get("apiKey").length() == 0) 
 				&& (Kloudless.accountId == null || Kloudless.accountKey
 						.length() == 0)
 				&& (Kloudless.accountKey == null || Kloudless.accountKey
+						.length() == 0)
+				&& (Kloudless.developerKey == null || Kloudless.developerKey
+						.length() == 0)
+				&& (keys.get("developerKey") == null || keys.get("developerKey")
 						.length() == 0)) {
 			throw new AuthenticationException(
-					"No API key or Account Key provided. (HINT: set your API key using 'Kloudless.apiKey = <API-KEY>'. "
+					"No API Key, Developer Key or Account Key provided. (HINT: set your API key using 'Kloudless.apiKey = <API-KEY>'"
+							+ " or 'Kloudless.developerKey = <DEV-KEY>'). "
 							+ "You can generate API keys from the Kloudless web interface. "
 							+ "See https://developers.kloudless.com/docs for details or email support@kloudless.com if you have questions.");
 		}
-
-		if (apiKey == null) {
-			apiKey = Kloudless.apiKey;
+		
+		if (Kloudless.apiKey != null) {
+			keys.put("apiKey", Kloudless.apiKey);
+		}		
+		else if (Kloudless.developerKey != null) {
+			keys.put("developerKey", Kloudless.developerKey);
 		}
-
+		
 		String query;
 		String url = String.format("%s/v%s/%s", Kloudless.getApiBase(),
 				Kloudless.apiVersion, path);
@@ -534,14 +553,14 @@ public abstract class APIResource extends KloudlessObject {
 		try {
 			// HTTPSURLConnection verifies SSL cert by default
 			response = makeURLConnectionRequest(method, params, url, query,
-					apiKey);
+					keys);
 		} catch (ClassCastException ce) {
 			// appengine doesn't have HTTPSConnection, use URLFetch API
 			String appEngineEnv = System.getProperty(
 					"com.google.appengine.runtime.environment", null);
 			if (appEngineEnv != null) {
 				response = makeAppEngineRequest(method, params, url, query,
-						apiKey);
+						keys);
 			} else {
 				// non-appengine ClassCastException
 				throw ce;
@@ -573,7 +592,7 @@ public abstract class APIResource extends KloudlessObject {
 	 * maintain AppEngine-specific JAR
 	 */
 	private static KloudlessResponse makeAppEngineRequest(RequestMethod method,
-			Map<String, Object> params, String url, String query, String apiKey)
+			Map<String, Object> params, String url, String query, Map<String, String> keys)
 			throws APIException {
 		String unknownErrorMessage = "Sorry, an unknown error occurred while trying to use the "
 				+ "Google App Engine runtime. Please contact support@kloudless.com for assistance.";
@@ -619,7 +638,7 @@ public abstract class APIResource extends KloudlessObject {
 					requestMethodClass, fetchOptionsClass).newInstance(
 					fetchURL, httpMethod, fetchOptions);
 
-			Map<String, String> extraHeaders = getHeaders(apiKey);
+			Map<String, String> extraHeaders = getHeaders(keys);
 			if (query == null || query.length() == 0) {
 				//This is a request that uses a json payload to make a request.
 				//look at createQuery.
