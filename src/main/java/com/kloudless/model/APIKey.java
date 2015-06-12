@@ -41,7 +41,7 @@ public class APIKey extends APIResourceMixin {
 	/**
 	 * Makes a Kloudless API request to create a new APIKey.
 	 * 
-	 * @param applicationId
+	 * @param applicationId - id of the application
 	 * @param params - no query parameters
 	 * @return APIKey
 	 * @throws APIException
@@ -72,14 +72,14 @@ public class APIKey extends APIResourceMixin {
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
 	 */
-	public static KloudlessResponse delete(String applicationId,
+	public static KloudlessResponse delete(String applicationId, String APIKey,
 			Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		
 		String path = String.format("%s/%s",
 				instanceURL(Application.class, applicationId),
-				classURL(APIKey.class));
+				instanceURL(APIKey.class, APIKey));
 		
 		return delete(path, params, null);
 	}

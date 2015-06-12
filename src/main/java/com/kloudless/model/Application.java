@@ -22,10 +22,9 @@ public class Application extends APIResourceMixin {
 	
 	/**
 	 * Makes a Kloudless API request returning an ApplicationCollection (list of Application objects).
-	 * Use this method to retrieve all accounts associated with your application.
+	 * Use this method to retrieve all applications associated with your account.
 	 *
-	 * @param resource - "applications"
-	 * @param params - query parameters that include page, pageSize, and active.
+	 * @param params - query parameters that include page, page_size, and active.
 	 * @return ApplicationCollection
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -41,7 +40,7 @@ public class Application extends APIResourceMixin {
 	/**
 	 * Makes a Kloudless API request to create a new Application.
 	 * 
-	 * @param accountId
+	 * @param accountId - account identifier
 	 * @param params - The parameters include:
 	 * 		- name - name of the new application
 	 * 		- description - description of the new application
@@ -83,7 +82,7 @@ public class Application extends APIResourceMixin {
 	 * Makes a Kloudless API request to update properties of an Application.  The contents
 	 * are placed in the body
 	 * 
-	 * @param applicationId
+	 * @param applicationId - application identifier
 	 * @param params - The parameters include:
 	 * 		- name - name of the new application
 	 * 		- description - description of the new application
@@ -97,17 +96,24 @@ public class Application extends APIResourceMixin {
 	public static Application update(String applicationId, Map<String, Object> params)
 			throws APIException, AuthenticationException,
 			InvalidRequestException, APIConnectionException {
-		return update(instanceURL(Application.class, applicationId), 
-				params, Application.class, null); //update is a put in APIResourceMixin.java
+		
+		KloudlessResponse response = request(RequestMethod.PATCH, 
+				instanceURL(Application.class, applicationId), 
+				params, null);
+		int rCode = response.getResponseCode();
+		String rBody = response.getResponseBody();
+		if (rCode < 200 || rCode >= 300) {
+			handleAPIError(rBody, rCode);
+		}
+		return GSON.fromJson(rBody, Application.class);
 	}
 	
 	/**
 	 * Makes a Kloudless API request to delete an Application. Returns a success or false within the
 	 * KloudlessResponse object.
 	 * 
-	 * @param id
-	 * @param accountId
-	 * @param params
+	 * @param applicationId
+	 * @param params - no query parameters for deleting an Application
 	 * @return KloudlessResponse
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -121,7 +127,4 @@ public class Application extends APIResourceMixin {
 		return delete(instanceURL(Application.class, applicationId),
 				params, null);
 	}
-
-
-
 }

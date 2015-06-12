@@ -248,8 +248,15 @@ public abstract class APIResource extends KloudlessObject {
 		OutputStream output = null;
 		// put in body the data for a PUT
 		try {
-			output = conn.getOutputStream();
-			output.write((byte[]) params.get("body"));
+			if (params.containsKey("body")) {
+				output = conn.getOutputStream();
+				output.write((byte[]) params.get("body"));
+			} else {
+				conn.setRequestProperty("Content-Type",
+						"application/json");
+				output = conn.getOutputStream();
+				output.write(GSON.toJson(params).getBytes());
+			}			
 		} finally {
 			if (output != null) {
 				output.close();
@@ -266,6 +273,10 @@ public abstract class APIResource extends KloudlessObject {
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
 
+		if (params == null) {
+			params = new HashMap<String, Object>();
+		} // hacky fix for create() APIKeys
+		
 		OutputStream output = null;
 		try {
 			if (params.containsKey("file") && params.containsKey("metadata")) {
@@ -488,7 +499,7 @@ public abstract class APIResource extends KloudlessObject {
 		try {
 			return _request(method, path, params, keys);
 		} finally {
-			if (allowedToSetTTL) {
+ 			if (allowedToSetTTL) {
 				if (originalDNSCacheTTL == null) {
 					// value unspecified by implementation
 					// DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever

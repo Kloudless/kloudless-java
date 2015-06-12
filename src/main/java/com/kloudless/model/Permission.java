@@ -23,7 +23,7 @@ public class Permission extends APIResourceMixin {
 	 * @param accountId - account identifier
 	 * @param type - "file" or "folder"
 	 * @param params - no query parameters for this method
-	 * @return KloudlessResponse
+	 * @return PermissionCollection
 	 * @throws APIException
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
@@ -53,7 +53,7 @@ public class Permission extends APIResourceMixin {
 	}
 	
 	/**
-	 * Makes a Kloudless API request to update contents of a file.  The contents
+	 * Makes a Kloudless API request to update/override the permissions of a file/folder object.  The contents
 	 * are placed in the body
 	 * 
 	 * @param id - file/folder identifier
@@ -61,16 +61,15 @@ public class Permission extends APIResourceMixin {
 	 * @param type - "file" or "folder"
 	 * @param params:
 	 * 		- key: email, value: role  ("previewer, "reader", "writer", "owner") 
-	 * @return File
+	 * @return PermissionCollection
 	 * @throws APIException
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
 	 */
-	public static Permission update(String id, String accountId, String type, Map<String, Object> params)
+	public static PermissionCollection update(String id, String accountId, String type, Map<String, Object> params)
 			throws APIException, AuthenticationException,
 			InvalidRequestException, APIConnectionException {
-
 		String path = null;
 		if (type == "folder") {
 			path = String.format("%s/%s/%s",
@@ -86,11 +85,11 @@ public class Permission extends APIResourceMixin {
 					classURL(Permission.class) 
 			);
 		}
-		return update(path, params, Permission.class, null);
+		return update(path, params, PermissionCollection.class, null);
 	}
 	
 	/**
-	 * Makes a Kloudless API request to update contents of a file.  The contents
+	 * Makes a Kloudless API request to update the permissions of a file/folder object.  The contents
 	 * are placed in the body
 	 * 
 	 * @param id - file/folder identifier
@@ -98,13 +97,13 @@ public class Permission extends APIResourceMixin {
 	 * @param type - "file" or "folder"
 	 * @param params:
 	 * 		- key: email, value: role  ("previewer, "reader", "writer", "owner") 
-	 * @return File
+	 * @return PermissionCollection
 	 * @throws APIException
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
 	 */
-	public static Permission save(String id, String accountId, String type, Map<String, Object> params)
+	public static PermissionCollection save(String id, String accountId, String type, Map<String, Object> params)
 			throws APIException, AuthenticationException,
 			InvalidRequestException, APIConnectionException {
 
@@ -123,6 +122,6 @@ public class Permission extends APIResourceMixin {
 					classURL(Permission.class) 
 			);
 		}
-		return save(path, params, Permission.class, null);
+		return save(path, params, PermissionCollection.class, null);
 	} 
 }
