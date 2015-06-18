@@ -2,6 +2,7 @@ package com.kloudless.net;
 
 import java.util.Map;
 
+import com.kloudless.model.Application;
 import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
@@ -25,11 +26,13 @@ public abstract class APIResourceMixin extends APIResource {
 	 * @throws APIConnectionException
 	 */
 	protected static <T> T all(String path, Map<String, Object> params,
-			Class<T> clazz, String apiKey) throws APIException,
+			Class<T> clazz, Map<String, String> keys) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
+		
+		System.out.println(path);
 		KloudlessResponse response = request(RequestMethod.GET, path, params,
-				apiKey);
+					keys);
 		int rCode = response.responseCode;
 		String rBody = response.responseBody;
 		if (rCode < 200 || rCode >= 300) {
@@ -40,11 +43,11 @@ public abstract class APIResourceMixin extends APIResource {
 
 	// Retrieve Mixin
 	protected static <T> T retrieve(String path, Map<String, Object> params,
-			Class<T> clazz, String apiKey) throws APIException,
+			Class<T> clazz, Map<String, String> keys) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		KloudlessResponse response = request(RequestMethod.GET, path, params,
-				apiKey);
+				keys);
 
 		int rCode = response.responseCode;
 		String rBody = response.responseBody;
@@ -56,10 +59,10 @@ public abstract class APIResourceMixin extends APIResource {
 
 	// Create Mixin
 	protected static <T> T create(String path, Map<String, Object> params,
-			Class<T> clazz, String apiKey) throws APIException,
+			Class<T> clazz, Map<String, String> keys) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
-		KloudlessResponse response = request(RequestMethod.POST, path, params, apiKey);
+		KloudlessResponse response = request(RequestMethod.POST, path, params, keys);
 		int rCode = response.responseCode;
 		String rBody = response.responseBody;
 		if (rCode < 200 || rCode >= 300) {
@@ -70,10 +73,10 @@ public abstract class APIResourceMixin extends APIResource {
 
 	// UpdatePartial Mixin
 	protected static <T> T save(String path, Map<String, Object> params,
-			Class<T> clazz, String apiKey) throws APIException,
+			Class<T> clazz, Map<String, String> keys) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
-		KloudlessResponse response = request(RequestMethod.PATCH, path, params, apiKey);
+		KloudlessResponse response = request(RequestMethod.PATCH, path, params, keys);
 		int rCode = response.responseCode;
 		String rBody = response.responseBody;
 		if (rCode < 200 || rCode >= 300) {
@@ -84,10 +87,10 @@ public abstract class APIResourceMixin extends APIResource {
 	
 	// Update Mixin
 	protected static <T> T update(String path, Map<String, Object> params,
-			Class<T> clazz, String apiKey) throws APIException,
+			Class<T> clazz, Map<String, String> keys) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
-		KloudlessResponse response = request(RequestMethod.PUT, path, params, apiKey);
+		KloudlessResponse response = request(RequestMethod.PUT, path, params, keys);
 		int rCode = response.responseCode;
 		String rBody = response.responseBody;
 		if (rCode < 200 || rCode >= 300) {
@@ -98,11 +101,11 @@ public abstract class APIResourceMixin extends APIResource {
 
 	// Delete Mixin
 	protected static KloudlessResponse delete(String path,
-			Map<String, Object> params, String apiKey) throws APIException,
+			Map<String, Object> params, Map<String, String> keys) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		KloudlessResponse response = request(RequestMethod.DELETE, path,
-				params, apiKey);
+				params, keys);
 
 		int rCode = response.responseCode;
 		String rBody = response.responseBody;

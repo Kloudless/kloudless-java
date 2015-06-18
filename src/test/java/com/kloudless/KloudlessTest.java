@@ -23,6 +23,12 @@ import com.kloudless.model.KeyCollection;
 import com.kloudless.model.Link;
 import com.kloudless.model.LinkCollection;
 import com.kloudless.model.MetadataCollection;
+import com.kloudless.model.Permission;
+import com.kloudless.model.PermissionCollection;
+import com.kloudless.model.User;
+import com.kloudless.model.UserCollection;
+import com.kloudless.model.Group;
+import com.kloudless.model.GroupCollection;
 
 public class KloudlessTest {
 
@@ -43,7 +49,7 @@ public class KloudlessTest {
 		// Add Test Accounts
 //		testAccounts.add("INSERT TEST ACCOUNTS HERE");
 	}
-
+	
 	// Begin Account Tests
 	@Test
 	public void testAccountAll() throws KloudlessException {
@@ -238,5 +244,82 @@ public class KloudlessTest {
 	@Test
 	public void testLinkDelete() throws KloudlessException {
 		// TODO: figure out how to test delete a file
+	}
+
+	// Begin Permissions Tests
+	@Test
+	public void testPermissionAll() throws KloudlessException {
+//		for (String testAccount : testAccounts) {
+//			PermissionCollection permissions = Permission.all("FOLDER ID", 
+//					testAccount, "folder", null);
+//			PermissionCollection permissions = Permission.all("FILE ID", 
+//					testAccount, "file", null);
+//			System.out.println(permissions);
+//		}
+	}
+
+	@Test
+	public void testPermissionUpdate() throws KloudlessException {
+//		HashMap<String, Object> params = new HashMap<String, Object>();
+//		params.put("EMAIL", "ROLE");
+//		
+//		for (String testAccount : testAccounts) {
+//			PermissionCollection permissions = Permission.update("FOLDER ID", 
+//					testAccount, "folder", params);
+//			PermissionCollection permissions = Permission.update("FILE ID", 
+//					testAccount, "file", params);
+//			System.out.println(permissions);
+//		}
+	}
+	
+	@Test
+	public void testPermissionSave() throws KloudlessException {
+//		HashMap<String, Object> params = new HashMap<String, Object>();
+//		params.put("EMAIL", "ROLE");
+//		
+//		for (String testAccount : testAccounts) {
+//			PermissionCollection permissions = Permission.update("FOLDER ID", 
+//					testAccount, "folder", params);
+//			PermissionCollection permissions = Permission.update("FILE ID", 
+//					testAccount, "file", params);
+//			System.out.println(permissions);
+//		}
+	}
+	
+	//Begin Team Endpoint Tests, Admin Account Required
+	@Test
+	public void testUserAll() throws KloudlessException {
+//		UserCollection users = User.all("ADMIN ACCOUNT ID", null);
+//		System.out.println(users);
+	}
+	
+	@Test
+	public void testUserRetrieve() throws KloudlessException {
+//		User user = User.retrieve("USER ID", "ADMIN ACCOUNT ID", null);
+//		System.out.println(user);
+	}
+	
+	@Test
+	public void testUserGroups() throws KloudlessException {
+//		GroupCollection groups = User.groups("USER ID", "ADMIN ACCOUNT ID", null);
+//		System.out.println(groups);
+	}
+	
+	@Test
+	public void testGroupAll() throws KloudlessException {
+//		GroupCollection groups = Group.all("ADMIN ACCOUNT ID", null);
+//		System.out.println(groups);
+	}
+	
+	@Test
+	public void testGroupRetrieve() throws KloudlessException {
+//		Group group = Group.retrieve("GROUP ID", "ADMIN ACCOUNT ID", null);
+//		System.out.println(group);
+	}
+	
+	@Test
+	public void testGroupUsers() throws KloudlessException {
+//		UserCollection users = Group.users("GROUP ID", "ADMIN ACCOUNT ID", null);
+//		System.out.println(users);
 	}
 }
