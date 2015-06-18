@@ -10,6 +10,7 @@ public abstract class Kloudless {
 	public static String apiKey = null;
 	public static String accountId = null;
 	public static String accountKey = null;
+	public static String developerKey = null;
 	public static String apiVersion = "0";
 	public static Map<String, String> customHeaders = new HashMap<String, String>();
 

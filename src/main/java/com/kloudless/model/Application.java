@@ -14,7 +14,7 @@ public class Application extends APIResourceMixin {
 	public String id;
 	public String name;
 	public String description;
-	public String logoURL;
+	public String logo_url;
 	public Boolean active;
 	public String created;
 	public String modified;
@@ -44,7 +44,7 @@ public class Application extends APIResourceMixin {
 	 * @param params - The parameters include:
 	 * 		- name - name of the new application
 	 * 		- description - description of the new application
-	 * 		- logoURL - URL of logo
+	 * 		- logo_url - URL of logo
 	 * 		- source - The ID of another application owned by the developer 
 	 * 			to use as a template to create the new application
 	 * @return Application
@@ -86,7 +86,7 @@ public class Application extends APIResourceMixin {
 	 * @param params - The parameters include:
 	 * 		- name - name of the new application
 	 * 		- description - description of the new application
-	 * 		- logoURL - URL of logo
+	 * 		- logo_url - URL of logo
 	 * @return Application
 	 * @throws APIException
 	 * @throws AuthenticationException

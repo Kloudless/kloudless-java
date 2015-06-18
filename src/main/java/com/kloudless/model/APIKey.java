@@ -19,7 +19,7 @@ public class APIKey extends APIResourceMixin {
 	 * Makes a Kloudless API request returning an APIKeyCollection (list of APIKey objects).
 	 * Use this method to retrieve all APIKeys associated with your application.
 	 *
-	 * @param applicationId - id of the application
+	 * @param applicationId - application identifier
 	 * @param params - query parameters that include page and page_size.
 	 * @return APIKeyCollection
 	 * @throws APIException
@@ -41,7 +41,7 @@ public class APIKey extends APIResourceMixin {
 	/**
 	 * Makes a Kloudless API request to create a new APIKey.
 	 * 
-	 * @param applicationId - id of the application
+	 * @param applicationId - application identifier
 	 * @param params - no query parameters
 	 * @return APIKey
 	 * @throws APIException
@@ -64,7 +64,8 @@ public class APIKey extends APIResourceMixin {
 	 * Makes a Kloudless API request to delete an APIKey. Returns a success or false within the
 	 * KloudlessResponse object.
 	 * 
-	 * @param applicationId
+	 * @param APIKey
+	 * @param applicationId - application identifier
 	 * @param params - no query parameters for deleting an APIKey
 	 * @return KloudlessResponse
 	 * @throws APIException
@@ -72,7 +73,7 @@ public class APIKey extends APIResourceMixin {
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
 	 */
-	public static KloudlessResponse delete(String applicationId, String APIKey,
+	public static KloudlessResponse delete(String APIKey, String applicationId,
 			Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
