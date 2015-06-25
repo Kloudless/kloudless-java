@@ -13,8 +13,10 @@ public abstract class Kloudless {
 	public static String developerKey = null;
 	public static String apiVersion = "0";
 	public static Map<String, String> customHeaders = new HashMap<String, String>();
+	public static final String APPLICATIONS = "applications";
 
-	private static String apiBase = BASE_URL;
+	private static String apiBase = BASE_URL; 
+	
 
 	/**
 	 * (FOR TESTING ONLY) If you'd like your API requests to hit your own
