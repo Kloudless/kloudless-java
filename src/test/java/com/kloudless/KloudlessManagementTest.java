@@ -39,7 +39,6 @@ public class KloudlessManagementTest {
 
 	@BeforeClass
 	public static void setUp() {
-		// To use the Management API, Kloudless.apiKey and Kloudless.accountKey must be null.
 		Kloudless.developerKey = "INSERT DEVELOPER KEY HERE";
 
 		// Override API Base, now works with http

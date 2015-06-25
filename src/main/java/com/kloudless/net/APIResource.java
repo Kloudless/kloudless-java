@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.String;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -110,7 +111,7 @@ public abstract class APIResource extends KloudlessObject {
 		return String.format("%s=%s", urlEncode(k), urlEncode(v));
 	}
 
-	static Map<String, String> getHeaders(Map<String, String> keys) {
+	static Map<String, String> getHeaders(Map<String, String> keys, String url) {
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("Accept-Charset", CHARSET);
 		headers.put("User-Agent", String.format("Kloudless/v1 JavaBindings/%s",
@@ -123,17 +124,26 @@ public abstract class APIResource extends KloudlessObject {
 		if (keys.get("developerKey") == null) {
 			keys.put("developerKey", Kloudless.developerKey);
 		}
+		
+		String appUrl = String.format("%s/v%s/%s", 
+				Kloudless.getApiBase(),
+				Kloudless.apiVersion,
+				Kloudless.APPLICATIONS);
 
-		if (keys.get("apiKey") != null) {
-			headers.put("Authorization", String.format("ApiKey %s", keys.get("apiKey")));
-		} else if (Kloudless.accountId != null && Kloudless.accountKey != null) {
+		if (url.startsWith(appUrl)) {
+			if (keys.get("developerKey") != null) {
 				headers.put("Authorization",
-						String.format("AccountKey %s", Kloudless.accountKey));
-		} else if (keys.get("developerKey") != null) {
-			headers.put("Authorization",
-					String.format("DeveloperKey %s", keys.get("developerKey")));
+						String.format("DeveloperKey %s", keys.get("developerKey")));
+			}
 		}
-	
+		else {
+			if (keys.get("apiKey") != null) {
+				headers.put("Authorization", String.format("ApiKey %s", keys.get("apiKey")));
+			} else if (Kloudless.accountId != null && Kloudless.accountKey != null) {
+					headers.put("Authorization",
+							String.format("AccountKey %s", Kloudless.accountKey));
+			}
+		} 
 
 		// debug headers
 		String[] propertyNames = { "os.name", "os.version", "os.arch",
@@ -196,7 +206,7 @@ public abstract class APIResource extends KloudlessObject {
 		conn.setConnectTimeout(30 * 1000);
 		conn.setReadTimeout(80 * 1000);
 		conn.setUseCaches(false);
-		for (Map.Entry<String, String> header : getHeaders(keys).entrySet()) {
+		for (Map.Entry<String, String> header : getHeaders(keys, url).entrySet()) {
 			conn.setRequestProperty(header.getKey(), header.getValue());
 		}
 
@@ -649,7 +659,7 @@ public abstract class APIResource extends KloudlessObject {
 					requestMethodClass, fetchOptionsClass).newInstance(
 					fetchURL, httpMethod, fetchOptions);
 
-			Map<String, String> extraHeaders = getHeaders(keys);
+			Map<String, String> extraHeaders = getHeaders(keys, url);
 			if (query == null || query.length() == 0) {
 				//This is a request that uses a json payload to make a request.
 				//look at createQuery.
