@@ -125,9 +125,12 @@ public abstract class APIResource extends KloudlessObject {
 			keys.put("developerKey", Kloudless.developerKey);
 		}
 		
-		CharSequence appEndpoint = Kloudless.APPLICATIONS;
-		
-		if (url.contains(appEndpoint)) {
+		String appUrl = String.format("%s/v%s/%s", 
+				Kloudless.getApiBase(),
+				Kloudless.apiVersion,
+				Kloudless.APPLICATIONS);
+
+		if (url.startsWith(appUrl)) {
 			if (keys.get("developerKey") != null) {
 				headers.put("Authorization",
 						String.format("DeveloperKey %s", keys.get("developerKey")));
