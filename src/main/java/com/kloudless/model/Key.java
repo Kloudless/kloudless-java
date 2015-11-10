@@ -13,13 +13,13 @@ public class Key extends APIResourceMixin {
 	public String id;
 	public Boolean active;
 	public String key;
-	public Integer account;
+	public Long account;
 	public String expiration;
 
 	/**
 	 * Makes a Kloudless API request to retrieve all account keys associated with this account. Returns an AccountKeyCollection
 	 * which is a list of account key data.
-	 * 
+	 *
 	 * @param accountId
 	 * @param params
 	 * @return AccountKeyCollection
@@ -38,7 +38,7 @@ public class Key extends APIResourceMixin {
 
 	/**
 	 * Makes a Kloudless API request to retrieve data of a specific account key.
-	 * 
+	 *
 	 * @param id - identifier of account key
 	 * @param accountId
 	 * @param params

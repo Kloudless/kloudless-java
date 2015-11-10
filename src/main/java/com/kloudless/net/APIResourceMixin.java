@@ -30,7 +30,6 @@ public abstract class APIResourceMixin extends APIResource {
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		
-		System.out.println(path);
 		KloudlessResponse response = request(RequestMethod.GET, path, params,
 					keys);
 		int rCode = response.responseCode;
