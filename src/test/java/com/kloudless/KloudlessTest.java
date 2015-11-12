@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.junit.BeforeClass;
@@ -25,10 +27,13 @@ import com.kloudless.model.LinkCollection;
 import com.kloudless.model.MetadataCollection;
 import com.kloudless.model.Permission;
 import com.kloudless.model.PermissionCollection;
+import com.kloudless.model.Property;
+import com.kloudless.model.PropertyCollection;
 import com.kloudless.model.User;
 import com.kloudless.model.UserCollection;
 import com.kloudless.model.Group;
 import com.kloudless.model.GroupCollection;
+import com.kloudless.net.KloudlessResponse;
 
 public class KloudlessTest {
 
@@ -44,12 +49,16 @@ public class KloudlessTest {
 
 		// Insert Custom Headers
 		HashMap<String, String> customHeaders = new HashMap<String, String>();
+
+		// USER IMPERSONATION
+//		customHeaders.put("X-Kloudless-As-User", "INSERT USER ID HERE");
+
 		Kloudless.addCustomHeaders(customHeaders);
 
 		// Add Test Accounts
 //		testAccounts.add("INSERT TEST ACCOUNTS HERE");
 	}
-	
+/*
 	// Begin Account Tests
 	@Test
 	public void testAccountAll() throws KloudlessException {
@@ -115,7 +124,7 @@ public class KloudlessTest {
 	public void testAccountKeyRetrieve() throws KloudlessException {
 		// TODO: add accountkey retrieval test
 	}
-
+*/
 	// Begin Folder Tests
 	@Test
 	public void testFolderContents() throws KloudlessException {
@@ -124,7 +133,7 @@ public class KloudlessTest {
 			System.out.println(contents);
 		}
 	}
-
+/*
 	@Test
 	public void testFolderRetrieve() throws KloudlessException {
 		// TODO: add folderRetrieval test
@@ -285,7 +294,28 @@ public class KloudlessTest {
 //			System.out.println(permissions);
 //		}
 	}
-	
+
+	// Begin Properties Tests
+	@Test
+	public void testPropertiesAll() throws KloudlessException {
+		for (String testAccount : testAccounts) {
+			PropertyCollection properties = Property.all("FILE ID",
+					testAccount, null);
+			System.out.println(properties);
+		}
+	}
+
+	// TODO: include updating properties test
+
+	@Test
+	public void testPropertiesDelete() throws KloudlessException {
+//		for (String testAccount : testAccounts) {
+//			KloudlessResponse response = Property.delete("FILE ID",
+//					testAccount, null);
+//			System.out.println(response);
+//		}
+	}
+
 	//Begin Team Endpoint Tests, Admin Account Required
 	@Test
 	public void testUserAll() throws KloudlessException {
@@ -322,4 +352,5 @@ public class KloudlessTest {
 //		UserCollection users = Group.users("GROUP ID", "ADMIN ACCOUNT ID", null);
 //		System.out.println(users);
 	}
+	*/
 }

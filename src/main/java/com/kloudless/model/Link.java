@@ -14,7 +14,7 @@ public class Link extends APIResourceMixin {
 	public String id;
 	public String file_id;
 	public String url;
-	public Integer account;
+	public Long account;
 	public Boolean active;
 	public String created;
 	public String modified;
@@ -22,7 +22,7 @@ public class Link extends APIResourceMixin {
 	/**
 	 * Makes a Kloudless API request to retrieve all links associated with this account. Returns a LinkCollection
 	 * which is a list of metadata for all links.
-	 * 
+	 *
 	 * @param accountId
 	 * @param params
 	 * @return LinkCollection
@@ -41,7 +41,7 @@ public class Link extends APIResourceMixin {
 
 	/**
 	 * Makes a Kloudless API request to retrieve metadata of a specific link.
-	 * 
+	 *
 	 * @param id - identifier of link
 	 * @param accountId
 	 * @param params
@@ -63,7 +63,7 @@ public class Link extends APIResourceMixin {
 
 	/**
 	 * Makes a Kloudless API request to update an existing link.
-	 * 
+	 *
 	 * @param id
 	 * @param accountId
 	 * @param params - The parameters include:
@@ -88,7 +88,7 @@ public class Link extends APIResourceMixin {
 
 	/**
 	 * Makes a Kloudless API request to create a link.
-	 * 
+	 *
 	 * @param accountId
 	 * @param params - The parameters include:
 	 * 		- file_id - the file identifier to create the link from
@@ -111,7 +111,7 @@ public class Link extends APIResourceMixin {
 
 	/**
 	 * Makes a Kloudless API Request to delete a link
-	 * 
+	 *
 	 * @param id - link identifier
 	 * @param params
 	 * @return KloudlessResponse

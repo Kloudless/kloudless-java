@@ -11,6 +11,7 @@ public abstract class Kloudless {
 	public static String accountId = null;
 	public static String accountKey = null;
 	public static String developerKey = null;
+	public static String bearerToken = null;
 	public static String apiVersion = "0";
 	public static Map<String, String> customHeaders = new HashMap<String, String>();
 	public static final String APPLICATIONS = "applications";
