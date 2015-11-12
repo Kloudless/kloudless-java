@@ -21,6 +21,7 @@ import java.util.Map;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.kloudless.Kloudless;
 import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
@@ -120,11 +121,15 @@ public abstract class APIResource extends KloudlessObject {
 		if (keys.get("apiKey") == null) {
 			keys.put("apiKey", Kloudless.apiKey);
 		}
-		
+
 		if (keys.get("developerKey") == null) {
 			keys.put("developerKey", Kloudless.developerKey);
 		}
-		
+
+		if (keys.get("bearerToken") == null) {
+			keys.put("bearerToken", Kloudless.bearerToken);
+		}
+
 		String appUrl = String.format("%s/v%s/%s", 
 				Kloudless.getApiBase(),
 				Kloudless.apiVersion,
@@ -140,10 +145,13 @@ public abstract class APIResource extends KloudlessObject {
 			if (keys.get("apiKey") != null) {
 				headers.put("Authorization", String.format("ApiKey %s", keys.get("apiKey")));
 			} else if (Kloudless.accountId != null && Kloudless.accountKey != null) {
-					headers.put("Authorization",
+				headers.put("Authorization",
 							String.format("AccountKey %s", Kloudless.accountKey));
+			} else if (Kloudless.bearerToken != null) {
+				headers.put("Authorization",
+							String.format("Bearer %s", Kloudless.bearerToken));
 			}
-		} 
+		}
 
 		// debug headers
 		String[] propertyNames = { "os.name", "os.version", "os.arch",
@@ -542,10 +550,13 @@ public abstract class APIResource extends KloudlessObject {
 				&& (Kloudless.developerKey == null || Kloudless.developerKey
 						.length() == 0)
 				&& (keys.get("developerKey") == null || keys.get("developerKey")
+						.length() == 0)
+				&& (keys.get("bearerToken") == null || keys.get("bearerToken")
 						.length() == 0)) {
 			throw new AuthenticationException(
 					"No API Key, Developer Key or Account Key provided. (HINT: set your API key using 'Kloudless.apiKey = <API-KEY>'"
-							+ " or 'Kloudless.developerKey = <DEV-KEY>'). "
+							+ " or 'Kloudless.developerKey = <DEV-KEY>'"
+							+ " or 'Kloudless.bearerToken = <OAUTH 2.0 BEARER TOKEN>')."
 							+ "You can generate API keys from the Kloudless web interface. "
 							+ "See https://developers.kloudless.com/docs for details or email support@kloudless.com if you have questions.");
 		}
@@ -555,6 +566,9 @@ public abstract class APIResource extends KloudlessObject {
 		}		
 		else if (Kloudless.developerKey != null) {
 			keys.put("developerKey", Kloudless.developerKey);
+		}
+		else if (Kloudless.bearerToken != null) {
+			keys.put("bearerToken", Kloudless.bearerToken);
 		}
 		
 		String query;
@@ -593,7 +607,15 @@ public abstract class APIResource extends KloudlessObject {
 	protected static void handleAPIError(String rBody, int rCode)
 			throws InvalidRequestException, AuthenticationException,
 			APIException {
-		APIResource.Error error = GSON.fromJson(rBody, APIResource.Error.class);
+		APIResource.Error error;
+		try {
+			error = GSON.fromJson(rBody, APIResource.Error.class);
+		} catch (JsonSyntaxException e) {
+			error = new APIResource.Error();
+			error.message = rBody;
+			error.param = "";
+		}
+
 		switch (rCode) {
 		case 400:
 			throw new InvalidRequestException(error.message, error.param, null);

@@ -1,5 +1,6 @@
 package com.kloudless.model;
 
+import java.util.List;
 import java.util.Map;
 
 import com.kloudless.exception.APIConnectionException;
@@ -16,7 +17,6 @@ public class Property extends APIResourceMixin {
 	public String modified;
 	public String box_scope;
 	public String box_template;
-	private String property_class = "properties";
 	
 	/**
 	 * Makes a Kloudless API Request returning a PropertyCollection (list of Property objects) for a given file.
@@ -36,10 +36,9 @@ public class Property extends APIResourceMixin {
 			AuthenticationException, InvalidRequestException, 
 			APIConnectionException {
 		
-		String path = String.format("%s/%s/%s",
+		String path = String.format("%s/%s/properties",
 				instanceURL(Account.class, accountId),
-				instanceURL(File.class, id),
-				property_class
+				instanceURL(File.class, id)
 		);
 		return all(path, params, PropertyCollection.class, null);
 	}
@@ -59,16 +58,18 @@ public class Property extends APIResourceMixin {
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
 	 */
-	public static PropertyCollection update(String id, String accountId, List<Map<String, String>> params)
+	// TODO: modify properties call to handle a list of objects in the body.
+	/*
+	public static PropertyCollection save(String id, String accountId, List<Map<String, Object>> params)
 			throws APIException, AuthenticationException,
 			InvalidRequestException, APIConnectionException {
-		String path = String.format("%s/%s/%s",
+		String path = String.format("%s/%s/properties",
 				instanceURL(Account.class, accountId),
-				instanceURL(File.class, id),
-				property_class
+				instanceURL(File.class, id)
 		);
-		return update(path, params, PropertyCollection.class, null);
+		return save(path, params, PropertyCollection.class, null);
 	}
+	*/
 	
 	/**
 	 * Makes a Kloudless API request to update the delete the properties of a file object.
@@ -86,10 +87,9 @@ public class Property extends APIResourceMixin {
 	public static KloudlessResponse delete(String id, String accountId, Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
-		String path = String.format("%s/%s/%s",
+		String path = String.format("%s/%s/properties",
 				instanceURL(Account.class, accountId),
-				instanceURL(File.class, id),
-				property_class
+				instanceURL(File.class, id)
 		);
 		return delete(path, params, null);
 	}

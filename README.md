@@ -22,6 +22,14 @@ Usage
 
 See [KloudlessTest.java](https://github.com/Kloudless/kloudless-java/blob/master/test/com/kloudless/KloudlessTest.java) for more examples.
 
+User Impersonation can be seen found in KloudlessTest.java or the example below:
+
+```java
+HashMap<String, String> customHeaders = new HashMap<String, String>();
+customHeaders.put("X-Kloudless-As-User", "<USER ID>");
+Kloudless.addCustomHeaders(customHeaders);
+```
+
 Building
 ==========
 
