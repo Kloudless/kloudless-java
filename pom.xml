@@ -4,7 +4,7 @@
   <groupId>com.kloudless</groupId>
   <artifactId>kloudless-java</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.5</version>
+  <version>0.1.6</version>
   <name>kloudless-java</name>
   <url>https://github.com/kloudless/kloudless-java</url>
   <dependencies>
