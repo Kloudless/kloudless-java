@@ -2,7 +2,6 @@ package com.kloudless.net;
 
 import java.util.Map;
 
-import com.kloudless.model.Application;
 import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;

@@ -7,7 +7,6 @@ import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
 import com.kloudless.net.APIResourceMixin;
-import com.kloudless.net.KloudlessResponse;
 
 public class Permission extends APIResourceMixin {
 	public String id;

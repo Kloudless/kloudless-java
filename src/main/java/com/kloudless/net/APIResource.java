@@ -9,7 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.String;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -734,9 +733,13 @@ public abstract class APIResource extends KloudlessObject {
 			int responseCode = (Integer) response.getClass()
 			        .getDeclaredMethod("getResponseCode").invoke(response);
 
+			String body;
 			byte[] responseBytes = (byte[]) response.getClass()
 			        .getDeclaredMethod("getContent").invoke(response);
-			String body = new String(responseBytes, CHARSET);
+			if (responseBytes == null)
+				body = "";
+			else
+				body = new String(responseBytes, CHARSET);
 			ByteArrayOutputStream responseStream = new ByteArrayOutputStream(
 			        responseBytes.length);
 			responseStream.write(responseBytes, 0, responseBytes.length);
