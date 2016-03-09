@@ -733,17 +733,16 @@ public abstract class APIResource extends KloudlessObject {
 			int responseCode = (Integer) response.getClass()
 			        .getDeclaredMethod("getResponseCode").invoke(response);
 
-			String body;
+			String body = "";
 			byte[] responseBytes = (byte[]) response.getClass()
 			        .getDeclaredMethod("getContent").invoke(response);
-			if (responseBytes == null)
-				body = "";
-			else
+			ByteArrayOutputStream responseStream = new ByteArrayOutputStream(0);
+			if (responseBytes != null) {
 				body = new String(responseBytes, CHARSET);
-			ByteArrayOutputStream responseStream = new ByteArrayOutputStream(
-			        responseBytes.length);
-			responseStream.write(responseBytes, 0, responseBytes.length);
-
+			    responseStream = new ByteArrayOutputStream(responseBytes.length);
+			    responseStream.write(responseBytes, 0, responseBytes.length);
+			}
+			
 			return new KloudlessResponse(responseCode, body, headers, responseStream);
 		} catch (InvocationTargetException e) {
 			throw new APIException(unknownErrorMessage, e);
