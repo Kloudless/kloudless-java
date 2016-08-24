@@ -8,7 +8,7 @@ import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
 import com.kloudless.net.APIResourceMixin;
 
-public class Key extends APIResourceMixin {
+public class Token extends APIResourceMixin {
 
 	public String id;
 	public Boolean active;
@@ -17,45 +17,46 @@ public class Key extends APIResourceMixin {
 	public String expiration;
 
 	/**
-	 * Makes a Kloudless API request to retrieve all account keys associated with this account. Returns an AccountKeyCollection
-	 * which is a list of account key data.
+	 * Makes a Kloudless API request to retrieve all bearer tokens associated
+	 * with this account. Returns a TokenCollection which is a list of
+	 * token data.
 	 *
 	 * @param accountId
 	 * @param params
-	 * @return AccountKeyCollection
+	 * @return TokenCollection
 	 * @throws APIException
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
 	 */
-	public static KeyCollection all(String accountId, Map<String, Object> params)
+	public static TokenCollection all(String accountId, Map<String, Object> params)
 			throws APIException, AuthenticationException,
 			InvalidRequestException, APIConnectionException {
 		String path = String.format("%s/%s",
-				instanceURL(Account.class, accountId), classURL(Key.class));
-		return all(path, params, KeyCollection.class, null);
+				instanceURL(Account.class, accountId), classURL(Token.class));
+		return all(path, params, TokenCollection.class, null);
 	}
 
 	/**
-	 * Makes a Kloudless API request to retrieve data of a specific account key.
+	 * Makes a Kloudless API request to retrieve data of a specific Bearer token.
 	 *
-	 * @param id - identifier of account key
+	 * @param id - identifier of Bearer token
 	 * @param accountId
 	 * @param params
-	 * @return AccountKey
+	 * @return Token
 	 * @throws APIException
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
 	 */
-	public static Key retrieve(String id, String accountId,
+	public static Token retrieve(String id, String accountId,
 			Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String
 				.format("%s/%s", instanceURL(Account.class, accountId),
-						instanceURL(Key.class, id));
-		return retrieve(path, params, Key.class, null);
+						instanceURL(Token.class, id));
+		return retrieve(path, params, Token.class, null);
 	}
 
 }
