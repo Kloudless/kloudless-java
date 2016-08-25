@@ -18,8 +18,6 @@ import com.kloudless.model.EventCollection;
 import com.kloudless.model.File;
 import com.kloudless.model.FileCollection;
 import com.kloudless.model.Folder;
-import com.kloudless.model.Token;
-import com.kloudless.model.TokenCollection;
 import com.kloudless.model.Link;
 import com.kloudless.model.LinkCollection;
 import com.kloudless.model.MetadataCollection;

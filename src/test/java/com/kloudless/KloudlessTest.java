@@ -20,8 +20,6 @@ import com.kloudless.model.EventCollection;
 import com.kloudless.model.File;
 import com.kloudless.model.FileCollection;
 import com.kloudless.model.Folder;
-import com.kloudless.model.Token;
-import com.kloudless.model.TokenCollection;
 import com.kloudless.model.Link;
 import com.kloudless.model.LinkCollection;
 import com.kloudless.model.MetadataCollection;
@@ -108,15 +106,6 @@ public class KloudlessTest {
 
 			events = Account.events(testAccount, params);
 			System.out.println(events);
-		}
-	}
-
-	// Begin Bearer Token Tests
-	@Test
-	public void testTokenAll() throws KloudlessException {
-		for (String testAccount : testAccounts) {
-			TokenCollection tokens = Token.all(testAccount, null);
-			System.out.println(tokens);
 		}
 	}
 

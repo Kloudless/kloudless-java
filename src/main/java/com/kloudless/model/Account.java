@@ -89,7 +89,7 @@ public class Account extends APIResourceMixin {
 	public static MetadataCollection search(String id, Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
-		String path = String.format("%s/search", instanceURL(Account.class, id));
+		String path = String.format("%s/storage/search", instanceURL(Account.class, id));
 		KloudlessResponse response = request(RequestMethod.GET, path, params,
 				null);
 
@@ -123,7 +123,7 @@ public class Account extends APIResourceMixin {
 	public static FileCollection recent(String id, Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
-		String path = String.format("%s/recent", instanceURL(Account.class, id));
+		String path = String.format("%s/storage/recent", instanceURL(Account.class, id));
 		KloudlessResponse response = request(RequestMethod.GET, path, params, null);
 
 		int rCode = response.getResponseCode();

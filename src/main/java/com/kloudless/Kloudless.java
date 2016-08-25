@@ -6,12 +6,12 @@ import java.util.Map;
 public abstract class Kloudless {
 
 	public static final String BASE_URL = "https://api.kloudless.com";
-	public static final String VERSION = "0.1.0";
+	public static final String VERSION = "1.0.0";
 	public static String apiKey = null;
 	public static String accountId = null;
 	public static String developerKey = null;
 	public static String bearerToken = null;
-	public static String apiVersion = "0";
+	public static String apiVersion = "1";
 	public static Map<String, String> customHeaders = new HashMap<String, String>();
 	public static final String APPLICATIONS = "applications";
 

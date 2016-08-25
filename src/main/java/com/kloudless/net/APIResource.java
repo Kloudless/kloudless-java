@@ -14,6 +14,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.net.URLStreamHandler;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,20 @@ public abstract class APIResource extends KloudlessObject {
 	}
 
 	protected static String classURL(Class<?> clazz) {
-		return String.format("%ss", singleClassURL(clazz));
+		HashSet<String> storageClasses = new HashSet<String>() {{
+			add("file");
+			add("folder");
+			add("link");
+		}};
+
+		String single = singleClassURL(clazz);
+		String prefix = null;
+		if (storageClasses.contains(single)) {
+			prefix = String.format("%s/%s", "storage", single);
+		} else {
+			prefix = single;
+		}
+		return String.format("%ss", prefix);
 	}
 
 	protected static String instanceURL(Class<?> clazz, String id)
