@@ -20,8 +20,6 @@ import com.kloudless.model.EventCollection;
 import com.kloudless.model.File;
 import com.kloudless.model.FileCollection;
 import com.kloudless.model.Folder;
-import com.kloudless.model.Key;
-import com.kloudless.model.KeyCollection;
 import com.kloudless.model.Link;
 import com.kloudless.model.LinkCollection;
 import com.kloudless.model.MetadataCollection;
@@ -111,18 +109,9 @@ public class KloudlessTest {
 		}
 	}
 
-	// Begin AccountKey Tests
 	@Test
-	public void testAccountKeyAll() throws KloudlessException {
-		for (String testAccount : testAccounts) {
-			KeyCollection keys = Key.all(testAccount, null);
-			System.out.println(keys);
-		}
-	}
-
-	@Test
-	public void testAccountKeyRetrieve() throws KloudlessException {
-		// TODO: add accountkey retrieval test
+	public void testTokenRetrieve() throws KloudlessException {
+		// TODO: add token retrieval test
 	}
 */
 	// Begin Folder Tests

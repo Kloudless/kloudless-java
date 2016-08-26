@@ -14,6 +14,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.net.URLStreamHandler;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,20 @@ public abstract class APIResource extends KloudlessObject {
 	}
 
 	protected static String classURL(Class<?> clazz) {
-		return String.format("%ss", singleClassURL(clazz));
+		HashSet<String> storageClasses = new HashSet<String>() {{
+			add("file");
+			add("folder");
+			add("link");
+		}};
+
+		String single = singleClassURL(clazz);
+		String prefix = null;
+		if (storageClasses.contains(single)) {
+			prefix = String.format("%s/%s", "storage", single);
+		} else {
+			prefix = single;
+		}
+		return String.format("%ss", prefix);
 	}
 
 	protected static String instanceURL(Class<?> clazz, String id)
@@ -143,9 +157,6 @@ public abstract class APIResource extends KloudlessObject {
 		else {
 			if (keys.get("apiKey") != null) {
 				headers.put("Authorization", String.format("ApiKey %s", keys.get("apiKey")));
-			} else if (Kloudless.accountId != null && Kloudless.accountKey != null) {
-				headers.put("Authorization",
-							String.format("AccountKey %s", Kloudless.accountKey));
 			} else if (Kloudless.bearerToken != null) {
 				headers.put("Authorization",
 							String.format("Bearer %s", Kloudless.bearerToken));
@@ -542,10 +553,6 @@ public abstract class APIResource extends KloudlessObject {
 		
 		if ((Kloudless.apiKey == null || Kloudless.apiKey.length() == 0)
 				&& (keys.get("apiKey") == null || keys.get("apiKey").length() == 0) 
-				&& (Kloudless.accountId == null || Kloudless.accountKey
-						.length() == 0)
-				&& (Kloudless.accountKey == null || Kloudless.accountKey
-						.length() == 0)
 				&& (Kloudless.developerKey == null || Kloudless.developerKey
 						.length() == 0)
 				&& (keys.get("developerKey") == null || keys.get("developerKey")
@@ -553,7 +560,7 @@ public abstract class APIResource extends KloudlessObject {
 				&& (keys.get("bearerToken") == null || keys.get("bearerToken")
 						.length() == 0)) {
 			throw new AuthenticationException(
-					"No API Key, Developer Key or Account Key provided. (HINT: set your API key using 'Kloudless.apiKey = <API-KEY>'"
+					"No API Key, Developer Key or Bearer Token provided. (HINT: set your API key using 'Kloudless.apiKey = <API-KEY>'"
 							+ " or 'Kloudless.developerKey = <DEV-KEY>'"
 							+ " or 'Kloudless.bearerToken = <OAUTH 2.0 BEARER TOKEN>')."
 							+ "You can generate API keys from the Kloudless web interface. "
