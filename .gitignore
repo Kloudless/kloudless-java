@@ -30,5 +30,6 @@ hs_err_pid*
 .idea/misc.xml
 .idea/modules.xml
 .idea/workspace.xml
+.idea/vcs.xml
 uiDesigner.xml
 kloudless-java.iml
