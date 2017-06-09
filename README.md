@@ -40,8 +40,20 @@ Building
 
 Testing
 =======
-
 You must have Maven installed. To run the tests, simply run `mvn test`.
+Before tests, api key or bearer token can be specified by using environment 
+variable, program argument, and property file. 
+```
+# environment variable
+API_KEY=keyValue mvn test
+BEARER_TOKEN=tokenValue
+# program argument
+mvn test -DapiKey=keyValue
+mvn test -DbearerToken=tokenValue
+# property file
+api_key = keyValue
+bearer_token = keyValue
+```
 You can run particular tests by passing `-D test=Class#method`.
 For example, `-D test=KloudlessTest#testAccountAll`.
 
