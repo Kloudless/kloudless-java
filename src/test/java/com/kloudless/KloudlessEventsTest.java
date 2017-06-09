@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,29 +18,24 @@ import com.kloudless.model.File;
 import com.kloudless.model.FileCollection;
 import com.kloudless.model.Folder;
 
+import static com.kloudless.StaticImporter.TestInfo;
+
 public class KloudlessEventsTest {
 
 	static Gson GSON = new GsonBuilder().create();
-	static ArrayList<String> accounts = new ArrayList<String>();
-	HashMap<String, Object> params = new HashMap<String, Object>();
-	HashMap<String, Object> metadata = new HashMap<String, Object>();
+	static List<String> accounts = new ArrayList<>();
+	HashMap<String, Object> params = new HashMap<>();
+	HashMap<String, Object> metadata = new HashMap<>();
 	
 	@BeforeClass
 	public static void setUp() {
-		Kloudless.apiKey = "INSERT API KEY HERE";
-
-		// Google Drive
-//		accounts.add("1");
-		// OneDrive
-//		accounts.add("2");
-		// Box
-//		accounts.add("3");
-		// Dropbox
-//		accounts.add("4");
+		Kloudless.apiKey = TestInfo.getApiKey();
+		accounts = TestInfo.getTestAccounts();
 	}
 
 	@Test
-	public void testCreateEvents() throws KloudlessException, FileNotFoundException, UnsupportedEncodingException, InterruptedException {
+	public void testCreateEvents() throws KloudlessException,
+			FileNotFoundException, UnsupportedEncodingException, InterruptedException {
 		for (String account : accounts) {
 
 			// Create Folder
@@ -116,7 +112,9 @@ public class KloudlessEventsTest {
 	public void testAccountRecent() throws KloudlessException {
 		for (String account : accounts) {
 			FileCollection results = Account.recent(account, null);
-			System.out.println(results);
+			if(results.count > 0) {
+				//TODO: assert returned objects
+			}
 		}
 	}
 
@@ -124,14 +122,10 @@ public class KloudlessEventsTest {
 	@Test
 	public void testAccountEvents() throws KloudlessException {
 		for (String account : accounts) {
-			params.clear();
-//			params.put("cursor", 11179); // gdrive
-//			params.put("cursor", 11715); // onedrive
-//			params.put("cursor", 11196); // box
-//			params.put("cursor", 11666); // dropbox
-			
 			EventCollection events = Account.events(account, params);
-			System.out.println(events);
+			if(events.count > 0) {
+				//TODO: assert returned objects
+			}
 		}
 	}
 }
