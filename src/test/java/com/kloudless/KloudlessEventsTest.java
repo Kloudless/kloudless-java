@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.gson.Gson;
@@ -35,8 +34,8 @@ public class KloudlessEventsTest {
 	}
 
 	@Test
-  @Ignore
-	public void testCreateEvents() throws KloudlessException, FileNotFoundException, UnsupportedEncodingException, InterruptedException {
+	public void testCreateEvents() throws KloudlessException,
+			FileNotFoundException, UnsupportedEncodingException, InterruptedException {
 		for (String account : accounts) {
 
 			// Create Folder

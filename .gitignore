@@ -24,11 +24,6 @@ target
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 /bin/
-.idea/compiler.xml
-.idea/encodings.xml
-.idea/libraries/
-.idea/misc.xml
-.idea/modules.xml
-.idea/workspace.xml
+.idea/**
 uiDesigner.xml
 kloudless-java.iml

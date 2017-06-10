@@ -7,12 +7,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.net.URLStreamHandler;
+import java.net.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +30,11 @@ import com.kloudless.model.DataDeserializer;
 import com.kloudless.model.KloudlessObject;
 import com.kloudless.model.KloudlessRawJsonObject;
 import com.kloudless.model.KloudlessRawJsonObjectDeserializer;
+import sun.net.www.protocol.https.HttpsURLConnectionImpl;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import static org.omg.IOP.TAG_ORB_TYPE.value;
 
 public abstract class APIResource extends KloudlessObject {
 
@@ -250,10 +253,30 @@ public abstract class APIResource extends KloudlessObject {
 			throws IOException {
 		java.net.HttpURLConnection conn = createKloudlessConnection(url,
 				keys);
+
+		Object target = null;
+    try {
+		  if(conn instanceof HttpsURLConnectionImpl) {
+          final Field delegate = HttpsURLConnectionImpl.class
+              .getDeclaredField("delegate");
+          delegate.setAccessible(true);
+          target = delegate.get(conn);
+      } else {
+		    target = conn;
+      }
+
+      final Field f = HttpURLConnection.class.getDeclaredField("methods");
+		  f.setAccessible(true);
+		  int last = 6;
+		  // replace trace with patch
+      ((String[])f.get(target))[last] = "PATCH";
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      //TODO: log
+      e.printStackTrace();
+    }
 		conn.setDoOutput(true);
-		conn.setRequestMethod("POST");
+		conn.setRequestMethod("PATCH");
 		conn.setRequestProperty("Content-Type", "application/json");
-		conn.setRequestProperty("X-HTTP-Method-Override", "PATCH");
 		OutputStream output = null;
 		try {
 			output = conn.getOutputStream();
