@@ -23,9 +23,11 @@ public final class TestInfoHelper {
   private final static String BEARER_TOKEN_ENV = "BEARER_TOKEN";
 
   private final static String TEST_ACCOUNTS_KEY = "test_accounts";
-  private final static String API_SERVER_ADDR = "api_server_addr";
-  private final static String API_SERVER_PROTO = "api_server_proto";
-  private final static String API_SERVER_PORT = "api_server_port";
+  private final static String API_SERVER_ADDR_KEY = "api_server_addr";
+  private final static String API_SERVER_PROTO_KEY = "api_server_proto";
+  private final static String API_SERVER_PORT_KEY = "api_server_port";
+
+  private final static String ONE_TEST_ACCOUNT_JSON_KEY = "one_test_account_json";
 
   private String apiKey = "";
   private String beaerToken = "";
@@ -43,15 +45,19 @@ public final class TestInfoHelper {
   }
 
   public String getApiServerAddr() {
-    return Props.getProperty(API_SERVER_ADDR, "api.kloudless.com").trim();
+    return Props.getProperty(API_SERVER_ADDR_KEY, "api.kloudless.com").trim();
   }
 
   public String getApiServerProto() {
-    return Props.getProperty(API_SERVER_PROTO, "https").trim();
+    return Props.getProperty(API_SERVER_PROTO_KEY, "https").trim();
   }
 
   public String getApiServerPort() {
-    return Props.getProperty(API_SERVER_PORT, "443").trim();
+    return Props.getProperty(API_SERVER_PORT_KEY, "443").trim();
+  }
+
+  public String getOneTestAccountJson() {
+    return Props.getProperty(ONE_TEST_ACCOUNT_JSON_KEY).trim();
   }
 
   public String getApiBasedUrl() {

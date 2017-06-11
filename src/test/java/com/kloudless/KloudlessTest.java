@@ -1,104 +1,140 @@
 package com.kloudless;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kloudless.exception.KloudlessException;
-import com.kloudless.model.Account;
-import com.kloudless.model.AccountCollection;
-import com.kloudless.model.EventCollection;
-import com.kloudless.model.File;
-import com.kloudless.model.FileCollection;
-import com.kloudless.model.Folder;
-import com.kloudless.model.Link;
-import com.kloudless.model.LinkCollection;
-import com.kloudless.model.MetadataCollection;
-import com.kloudless.model.Permission;
-import com.kloudless.model.PermissionCollection;
-import com.kloudless.model.Property;
-import com.kloudless.model.PropertyCollection;
-import com.kloudless.model.User;
-import com.kloudless.model.UserCollection;
-import com.kloudless.model.Group;
-import com.kloudless.model.GroupCollection;
-import com.kloudless.net.KloudlessResponse;
+import com.kloudless.model.*;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import static com.kloudless.StaticImporter.TestInfo;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class KloudlessTest {
+
+public class KloudlessTest extends KloudlessBaseTest {
 
 	static Gson GSON = new GsonBuilder().create();
-	static ArrayList<String> testAccounts = new ArrayList<String>();
+	static List<String> testAccounts;
 
 	@BeforeClass
 	public static void setUp() {
 		Kloudless.apiKey = TestInfo.getApiKey();
-
-		// Override API Base, now works with http
-//		Kloudless.overrideApiBase("http://localhost:8002");
+		testAccounts = TestInfo.getTestAccounts();
+		Kloudless.overrideApiBase(TestInfo.getApiBasedUrl());
 
 		// Insert Custom Headers
 		HashMap<String, String> customHeaders = new HashMap<String, String>();
 
 		// USER IMPERSONATION
-//		customHeaders.put("X-Kloudless-As-User", "INSERT USER ID HERE");
-
+    // customHeaders.put("X-Kloudless-As-User", "INSERT USER ID HERE");
 		Kloudless.addCustomHeaders(customHeaders);
-
-		// Add Test Accounts
-//		testAccounts.add("INSERT TEST ACCOUNTS HERE");
 	}
-/*
+
 	// Begin Account Tests
 	@Test
 	public void testAccountAll() throws KloudlessException {
 		AccountCollection accounts = Account.all(null);
-		System.out.println(accounts);
+		List<Account> list = accounts.objects.stream().filter(x -> testAccounts
+        .contains(x.id)).collect(Collectors.toList());
+		assertThat(list.size()).isGreaterThan(0);
 	}
 
 	@Test
 	public void testAccountRetrieve() throws KloudlessException {
 		for (String testAccount : testAccounts) {
 			Account account = Account.retrieve(testAccount, null);
-			System.out.println(account);
+			String jsonTree = TestInfo.getOneTestAccountJson();
+      try {
+        JsonNode root = mapper.readTree(jsonTree);
+        int id = root.at("/id").asInt();
+        assertThat(Integer.parseInt(account.id)).isEqualTo(id);
+        String acnt = root.at("/account").asText();
+        assertThat(account.account).isEqualTo(acnt);
+        String service = root.at("/service").asText();
+        assertThat(account.service).isEqualTo(service);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
 		}
 	}
 
 	@Test
+  @Ignore
 	public void testAccountDelete() throws KloudlessException {
 		// TODO: figure out how to test delete an account
 	}
 
 	@Test
 	public void testAccountSearch() throws KloudlessException {
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		params.put("q", "test");
+	  HashMap<String, Object> params = new HashMap<String, Object>();
+	  final String folderName = "new test folder";
 
 		for (String testAccount : testAccounts) {
+      params.put("name",folderName);
+      params.put("parent_id", "root");
+		  Folder.create(testAccount, params);
+
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+      params.clear();
+      params.put("q", folderName);
 			MetadataCollection results = Account.search(testAccount, params);
-			System.out.println(results);
+			if(results.count > 0) {
+			  results.objects.stream().forEach(x -> {
+			    assertThat(x.name).isEqualTo(folderName);
+        });
+      }
 		}
 	}
 
 	@Test
 	public void testAccountRecent() throws KloudlessException {
+	  HashMap<String, Object> params = new HashMap<>();
+	  HashMap<String, Object> metadata = new HashMap<>();
+	  final String fileName = "test recent file";
+
 		for (String testAccount : testAccounts) {
+      metadata.put("name", fileName);
+      metadata.put("parent_id", "root");
+      try {
+        params.put("metadata", mapper.writeValueAsString(metadata));
+      } catch (JsonProcessingException e) {
+        e.printStackTrace();
+      }
+      params.put("file", "Hello, World!".getBytes());
+      params.put("name",fileName);
+      params.put("parent_id", "root");
+		  File.create(testAccount, params);
+
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
 			FileCollection results = Account.recent(testAccount, null);
-			System.out.println(results);
+      List<Metadata> list = results.objects.stream().filter(x->x.name.equals(fileName))
+          .collect(Collectors.toList());
+      assertThat(list.size()).isGreaterThan(0);
 		}
 	}
 
 	@Test
+  @Ignore
 	public void testAccountEvents() throws KloudlessException {
 		HashMap<String, Object> params = new HashMap<String, Object>();
 //		params.put("cursor", "after-auth");
@@ -112,30 +148,35 @@ public class KloudlessTest {
 	}
 
 	@Test
+  @Ignore
 	public void testTokenRetrieve() throws KloudlessException {
 		// TODO: add token retrieval test
 	}
-*/
+
 	// Begin Folder Tests
 	@Test
+  @Ignore
 	public void testFolderContents() throws KloudlessException {
 		for (String testAccount : testAccounts) {
 			MetadataCollection contents = Folder.contents("root", testAccount, null);
 			System.out.println(contents);
 		}
 	}
-/*
+
 	@Test
+  @Ignore
 	public void testFolderRetrieve() throws KloudlessException {
 		// TODO: add folderRetrieval test
 	}
 
 	@Test
+  @Ignore
 	public void testFolderSave() throws KloudlessException {
 		// TODO: add folderSave test
 	}
 
 	@Test
+  @Ignore
 	public void testFolderCreate() throws KloudlessException {
 		HashMap<String, Object> params = new HashMap<String, Object>();
 		params.put("name", "new new folder");
@@ -148,12 +189,14 @@ public class KloudlessTest {
 	}
 
 	@Test
+  @Ignore
 	public void testFolderDelete() throws KloudlessException {
 		// TODO: figure out how to test delete a folder
 	}
 
 	// Begin File Tests
 	@Test
+  @Ignore
 	public void testFileContents() throws KloudlessException, IOException {
 //		KloudlessResponse response = File.contents(
 //				"fL3N1cHBvcnQtc2FsZXNmb3JjZS5wbmc\u003d", "4", null);
@@ -175,16 +218,19 @@ public class KloudlessTest {
 	}
 
 	@Test
+  @Ignore
 	public void testFileRetrieve() throws KloudlessException {
 		// TODO: add fileRetrieve test
 	}
 
 	@Test
+  @Ignore
 	public void testFileSave() throws KloudlessException {
 		// TODO: add fileSave test
 	}
 
 	@Test
+  @Ignore
 	// TODO: test
 	public void testFileCreate() throws KloudlessException, IOException {
 
@@ -213,12 +259,14 @@ public class KloudlessTest {
 	}
 
 	@Test
+  @Ignore
 	public void testFileDelete() throws KloudlessException {
 		// TODO: figure out how to test delete a file
 	}
 
 	// Begin Link Tests
 	@Test
+  @Ignore
 	public void testLinkAll() throws KloudlessException {
 		for (String testAccount : testAccounts) {
 			LinkCollection links = Link.all(testAccount, null);
@@ -227,27 +275,32 @@ public class KloudlessTest {
 	}
 
 	@Test
+  @Ignore
 	public void testLinkRetrieve() throws KloudlessException {
 		// TODO: figure out how to test retrieve a created link
 	}
 
 	@Test
+  @Ignore
 	public void testLinkSave() throws KloudlessException {
 		// TODO: figure out how to test save a created link
 	}
 
 	@Test
+  @Ignore
 	public void testLinkCreate() throws KloudlessException {
 		// TODO: figure out how to test create a link
 	}
 
 	@Test
+  @Ignore
 	public void testLinkDelete() throws KloudlessException {
 		// TODO: figure out how to test delete a file
 	}
 
 	// Begin Permissions Tests
 	@Test
+  @Ignore
 	public void testPermissionAll() throws KloudlessException {
 //		for (String testAccount : testAccounts) {
 //			PermissionCollection permissions = Permission.all("FOLDER ID", 
@@ -259,6 +312,7 @@ public class KloudlessTest {
 	}
 
 	@Test
+  @Ignore
 	public void testPermissionUpdate() throws KloudlessException {
 //		HashMap<String, Object> params = new HashMap<String, Object>();
 //		params.put("EMAIL", "ROLE");
@@ -273,6 +327,7 @@ public class KloudlessTest {
 	}
 	
 	@Test
+  @Ignore
 	public void testPermissionSave() throws KloudlessException {
 //		HashMap<String, Object> params = new HashMap<String, Object>();
 //		params.put("EMAIL", "ROLE");
@@ -288,6 +343,7 @@ public class KloudlessTest {
 
 	// Begin Properties Tests
 	@Test
+  @Ignore
 	public void testPropertiesAll() throws KloudlessException {
 		for (String testAccount : testAccounts) {
 			PropertyCollection properties = Property.all("FILE ID",
@@ -299,6 +355,7 @@ public class KloudlessTest {
 	// TODO: include updating properties test
 
 	@Test
+  @Ignore
 	public void testPropertiesDelete() throws KloudlessException {
 //		for (String testAccount : testAccounts) {
 //			KloudlessResponse response = Property.delete("FILE ID",
@@ -309,39 +366,44 @@ public class KloudlessTest {
 
 	//Begin Team Endpoint Tests, Admin Account Required
 	@Test
+  @Ignore
 	public void testUserAll() throws KloudlessException {
 //		UserCollection users = User.all("ADMIN ACCOUNT ID", null);
 //		System.out.println(users);
 	}
 	
 	@Test
+  @Ignore
 	public void testUserRetrieve() throws KloudlessException {
 //		User user = User.retrieve("USER ID", "ADMIN ACCOUNT ID", null);
 //		System.out.println(user);
 	}
 	
 	@Test
+  @Ignore
 	public void testUserGroups() throws KloudlessException {
 //		GroupCollection groups = User.groups("USER ID", "ADMIN ACCOUNT ID", null);
 //		System.out.println(groups);
 	}
 	
 	@Test
+  @Ignore
 	public void testGroupAll() throws KloudlessException {
 //		GroupCollection groups = Group.all("ADMIN ACCOUNT ID", null);
 //		System.out.println(groups);
 	}
 	
 	@Test
+  @Ignore
 	public void testGroupRetrieve() throws KloudlessException {
 //		Group group = Group.retrieve("GROUP ID", "ADMIN ACCOUNT ID", null);
 //		System.out.println(group);
 	}
 	
 	@Test
+  @Ignore
 	public void testGroupUsers() throws KloudlessException {
 //		UserCollection users = Group.users("GROUP ID", "ADMIN ACCOUNT ID", null);
 //		System.out.println(users);
 	}
-	*/
 }
