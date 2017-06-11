@@ -42,11 +42,7 @@
     <connection>scm:git:git@github.com:kloudless/kloudless-java.git</connection>
     <developerConnection>scm:git:git@github.com:kloudless/kloudless-java.git</developerConnection>
     <url>git@github.com:kloudless/kloudless-java.git</url>
-<<<<<<< HEAD
     <tag>master</tag>
-=======
-    <tag>HEAD</tag>
->>>>>>> be4bd0d... Add classes to collect information required for test cases
   </scm>
   
   <distributionManagement>
@@ -88,25 +84,15 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>2.8.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>3.8.0</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
  
-<<<<<<< HEAD
-=======
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
     <version>7</version>
   </parent>
   
->>>>>>> be4bd0d... Add classes to collect information required for test cases
   <build>
     <plugins>
       <plugin>

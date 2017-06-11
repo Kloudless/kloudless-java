@@ -46,14 +46,36 @@ variable, program argument, and property file.
 ```
 # environment variable
 API_KEY=keyValue mvn test
-BEARER_TOKEN=tokenValue
+BEARER_TOKEN=tokenValue mvn test
 # program argument
 mvn test -DapiKey=keyValue
 mvn test -DbearerToken=tokenValue
-# property file
-api_key = keyValue
-bearer_token = keyValue
 ```
 You can run particular tests by passing `-D test=Class#method`.
 For example, `-D test=KloudlessTest#testAccountAll`.
+
+##kloudless.configuration.properties
+###accounts for the test
+test_accounts is the key where multiple accounts can be specified like below
+```
+# multiple test accounts use colon to seprate
+test_accounts = 1234; 5678; 91011
+```
+### json data for the test
+one_test_account_json is the key where json data for an account can be specified.
+This [endpoint](https://developers.kloudless.com/docs/v1/authentication#accounts-retrieve-an-account)
+can download the json data for an account
+```
+test_one_test_account_json = {"id":1234,"service":.....}
+```
+###file to be uploaded for the test
+```
+path_uploading_file=/path/to/a/file
+```
+### server information for the test
+```
+api_server_addr         = localhost 
+api_server_proto        = http
+api_server_port         = 8002 
+```
 

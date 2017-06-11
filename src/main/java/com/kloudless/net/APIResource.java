@@ -1,21 +1,5 @@
 package com.kloudless.net;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,16 +9,20 @@ import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
-import com.kloudless.model.Data;
-import com.kloudless.model.DataDeserializer;
-import com.kloudless.model.KloudlessObject;
-import com.kloudless.model.KloudlessRawJsonObject;
-import com.kloudless.model.KloudlessRawJsonObjectDeserializer;
+import com.kloudless.model.*;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import sun.net.www.protocol.https.HttpsURLConnectionImpl;
 
-import javax.net.ssl.HttpsURLConnection;
-
-import static org.omg.IOP.TAG_ORB_TYPE.value;
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 public abstract class APIResource extends KloudlessObject {
 
@@ -322,57 +310,37 @@ public abstract class APIResource extends KloudlessObject {
 	private static java.net.HttpURLConnection createPostConnection(
 			String url, Map<String, Object> params, String query, Map<String, String> keys)
 			throws IOException {
-		java.net.HttpURLConnection conn = createKloudlessConnection(url,
-				keys);
+		java.net.HttpURLConnection conn = createKloudlessConnection(url, keys);
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
 
 		if (params == null) {
-			params = new HashMap<String, Object>();
+			params = new HashMap<>();
 		} // hacky fix for create() APIKeys
-		
-		OutputStream output = null;
-		try {
-			if (params.containsKey("file") && params.containsKey("metadata")) {
 
-				Map<?, ?> json = GSON.fromJson((String) params.get("metadata"),
-						Map.class);
-				String name = (String) json.get("name");
-				String twoHyphens = "--";
-				String boundary = "*****";
-				String crlf = "\r\n";
+    OutputStream output = null;
+    try {
+      if (params.containsKey("file")) {
+        conn.setRequestProperty("X-Kloudless-Metadata", (String) params.get("metadata"));
+        conn.setRequestProperty("Content-Type", "application/octet-stream");
+        byte[] bytes = (byte[]) params.get("file");
+        conn.setRequestProperty("Content-Length", String.valueOf(bytes.length));
 
-				conn.setRequestProperty("Content-Type",
-						"multipart/form-data;boundary=" + boundary);
-				output = conn.getOutputStream();
-				output.write((crlf + twoHyphens + boundary + crlf)
-						.getBytes(CHARSET));
-				output.write(("Content-Disposition: form-data; name=\"file\";filename=\""
-						+ name + "\"" + crlf).getBytes(CHARSET));
-				output.write(("Content-Type: application/octet-stream" + crlf + crlf)
-						.getBytes(CHARSET));
-				output.write((byte[]) params.get("file"));
-				output.write((crlf + twoHyphens + boundary + crlf)
-						.getBytes(CHARSET));
-				output.write(("Content-Disposition: form-data; name=\"metadata\""
-						+ crlf + crlf).getBytes(CHARSET));
-				output.write((((String) params.get("metadata"))
-						.getBytes(CHARSET)));
-				output.write((crlf + twoHyphens + boundary + crlf)
-						.getBytes(CHARSET));
-
-			} else {
-				conn.setRequestProperty("Content-Type", String
-						.format("application/json;charset=%s",
-								CHARSET));
-				output = conn.getOutputStream();
-				output.write(GSON.toJson(params).getBytes());
-			}
-		} finally {
-			if (output != null) {
-				output.close();
-			}
-		}
+        output = conn.getOutputStream();
+        output.write(bytes);
+        output.flush();
+      } else {
+        conn.setRequestProperty("Content-Type", String
+            .format("application/json;charset=%s",
+                CHARSET));
+        output = conn.getOutputStream();
+        output.write(GSON.toJson(params).getBytes());
+      }
+    } finally {
+      if(output != null) {
+        output.close();
+      }
+    }
 		return conn;
 	}
 
