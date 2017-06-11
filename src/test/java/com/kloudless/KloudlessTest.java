@@ -33,6 +33,8 @@ import com.kloudless.model.Group;
 import com.kloudless.model.GroupCollection;
 import com.kloudless.net.KloudlessResponse;
 
+import static com.kloudless.StaticImporter.TestInfo;
+
 public class KloudlessTest {
 
 	static Gson GSON = new GsonBuilder().create();
@@ -40,7 +42,7 @@ public class KloudlessTest {
 
 	@BeforeClass
 	public static void setUp() {
-		Kloudless.apiKey = "INSERT API KEY HERE";
+		Kloudless.apiKey = TestInfo.getApiKey();
 
 		// Override API Base, now works with http
 //		Kloudless.overrideApiBase("http://localhost:8002");
