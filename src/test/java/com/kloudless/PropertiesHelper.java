@@ -12,7 +12,7 @@ import java.util.Properties;
  */
 public final class PropertiesHelper {
 
-  private final static String PROP_FILE_NAME = "configuration.properties";
+  private final static String PROP_FILE_NAME = "kloudless.configuration.properties";
   private volatile Properties props = null;
   private final static Object lck = new Object();
   private static PropertiesHelper instance;
