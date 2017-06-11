@@ -23,6 +23,9 @@ public final class TestInfoHelper {
   private final static String BEARER_TOKEN_ENV = "BEARER_TOKEN";
 
   private final static String TEST_ACCOUNTS_KEY = "test_accounts";
+  private final static String API_SERVER_ADDR = "api_server_addr";
+  private final static String API_SERVER_PROTO = "api_server_proto";
+  private final static String API_SERVER_PORT = "api_server_port";
 
   private String apiKey = "";
   private String beaerToken = "";
@@ -37,6 +40,38 @@ public final class TestInfoHelper {
 
   public String getBearerToken() {
     return beaerToken;
+  }
+
+  public String getApiServerAddr() {
+    return Props.getProperty(API_SERVER_ADDR, "api.kloudless.com").trim();
+  }
+
+  public String getApiServerProto() {
+    return Props.getProperty(API_SERVER_PROTO, "https").trim();
+  }
+
+  public String getApiServerPort() {
+    return Props.getProperty(API_SERVER_PORT, "443").trim();
+  }
+
+  public String getApiBasedUrl() {
+    String proto = getApiServerProto();
+    String addr = getApiServerAddr();
+    String port = getApiServerPort();
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(proto);
+    sb.append("://");
+    sb.append(addr);
+    if(proto.equalsIgnoreCase("https") && !port.equals("443")) {
+      sb.append(":");
+      sb.append(port);
+    }
+    if(proto.equalsIgnoreCase("http") && !port.equals("80")) {
+      sb.append(":");
+      sb.append(port);
+    }
+    return sb.toString();
   }
 
   public List<String> getTestAccounts(){
