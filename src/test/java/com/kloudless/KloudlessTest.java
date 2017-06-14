@@ -69,7 +69,7 @@ public class KloudlessTest extends KloudlessBaseTest {
 
 	@Test
 	public void testAccountSearch() throws KloudlessException {
-	  final String folderName = "new test fold\u00e9r";
+	  final String folderName = "test account search fold\u00e9r";
 
 		for (String testAccount : testAccounts) {
 		  createTestFolder(folderName, getRootFolderId(testAccount), testAccount);
@@ -236,7 +236,7 @@ public class KloudlessTest extends KloudlessBaseTest {
         e.printStackTrace();
       }
       KloudlessResponse response = File.contents(file.id, account,null);
-      int actualSize = response.getResponseStream().size();
+      long actualSize = response.getResponseStream().size();
       assertThat(actualSize).isEqualTo(expectedSize);
     }
     //TODO: text file
