@@ -235,7 +235,7 @@ public class KloudlessTest extends KloudlessBaseTest {
         e.printStackTrace();
       }
       KloudlessResponse response = File.contents(file.id, account,null);
-      int actualSize = response.getResponseStream().size();
+      long actualSize = response.getResponseStream().size();
       assertThat(actualSize).isEqualTo(expectedSize);
     }
     //TODO: text file
