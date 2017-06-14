@@ -70,7 +70,6 @@ public class KloudlessTest extends KloudlessBaseTest {
 	@Test
 	public void testAccountSearch() throws KloudlessException {
 	  final String folderName = "new test fold\u00e9r";
-
 		for (String testAccount : testAccounts) {
 		  createTestFolder(folderName, getRootFolderId(testAccount), testAccount);
       try {
