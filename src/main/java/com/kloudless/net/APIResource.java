@@ -10,6 +10,7 @@ import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
 import com.kloudless.model.*;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import sun.net.www.protocol.https.HttpsURLConnectionImpl;
 
 import java.io.*;
@@ -309,57 +310,43 @@ public abstract class APIResource extends KloudlessObject {
 	private static java.net.HttpURLConnection createPostConnection(
 			String url, Map<String, Object> params, String query, Map<String, String> keys)
 			throws IOException {
-		java.net.HttpURLConnection conn = createKloudlessConnection(url,
-				keys);
+		java.net.HttpURLConnection conn = createKloudlessConnection(url, keys);
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
 
 		if (params == null) {
-			params = new HashMap<String, Object>();
+			params = new HashMap<>();
 		} // hacky fix for create() APIKeys
-		
-		OutputStream output = null;
-		try {
-			if (params.containsKey("file") && params.containsKey("metadata")) {
 
-				Map<?, ?> json = GSON.fromJson((String) params.get("metadata"),
-						Map.class);
-				String name = (String) json.get("name");
-				String twoHyphens = "--";
-				String boundary = "*****";
-				String crlf = "\r\n";
+    OutputStream output = null;
+    try {
+      if (params.containsKey("file")) {
+        conn.setRequestProperty("X-Kloudless-Metadata", (String) params.get("metadata"));
+        conn.setRequestProperty("Content-Type", "application/octet-stream");
+        byte[] bytes = (byte[]) params.get("file");
+        conn.setRequestProperty("Content-Length", String.valueOf(bytes.length));
 
-				conn.setRequestProperty("Content-Type",
-						"multipart/form-data;boundary=" + boundary);
-				output = conn.getOutputStream();
-				output.write((crlf + twoHyphens + boundary + crlf)
-						.getBytes(CHARSET));
-				output.write(("Content-Disposition: form-data; name=\"file\";filename=\""
-						+ name + "\"" + crlf).getBytes(CHARSET));
-				output.write(("Content-Type: application/octet-stream" + crlf + crlf)
-						.getBytes(CHARSET));
-				output.write((byte[]) params.get("file"));
-				output.write((crlf + twoHyphens + boundary + crlf)
-						.getBytes(CHARSET));
-				output.write(("Content-Disposition: form-data; name=\"metadata\""
-						+ crlf + crlf).getBytes(CHARSET));
-				output.write((((String) params.get("metadata"))
-						.getBytes(CHARSET)));
-				output.write((crlf + twoHyphens + boundary + crlf)
-						.getBytes(CHARSET));
+        output = conn.getOutputStream();
+        output.write(bytes);
+        output.flush();
 
-			} else {
-				conn.setRequestProperty("Content-Type", String
-						.format("application/json;charset=%s",
-								CHARSET));
-				output = conn.getOutputStream();
-				output.write(GSON.toJson(params).getBytes());
-			}
-		} finally {
-			if (output != null) {
-				output.close();
-			}
-		}
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      } else {
+        conn.setRequestProperty("Content-Type", String
+            .format("application/json;charset=%s",
+                CHARSET));
+        output = conn.getOutputStream();
+        output.write(GSON.toJson(params).getBytes());
+      }
+    } finally {
+      if(output != null) {
+        output.close();
+      }
+    }
 		return conn;
 	}
 

@@ -1,25 +1,24 @@
 package com.kloudless;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kloudless.exception.KloudlessException;
 import com.kloudless.model.*;
+import com.kloudless.net.KloudlessResponse;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.kloudless.StaticImporter.TestInfo;
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class KloudlessTest extends KloudlessBaseTest {
 
@@ -69,28 +68,18 @@ public class KloudlessTest extends KloudlessBaseTest {
 	}
 
 	@Test
-  @Ignore
-	public void testAccountDelete() throws KloudlessException {
-		// TODO: figure out how to test delete an account
-	}
-
-	@Test
 	public void testAccountSearch() throws KloudlessException {
-	  HashMap<String, Object> params = new HashMap<String, Object>();
-	  final String folderName = "new test folder";
+	  final String folderName = "new test fold\u00e9r";
 
 		for (String testAccount : testAccounts) {
-      params.put("name",folderName);
-      params.put("parent_id", "root");
-		  Folder.create(testAccount, params);
-
+		  createTestFolder(folderName, getRootFolderId(testAccount), testAccount);
       try {
-        Thread.sleep(5000);
+        Thread.sleep(2000);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
 
-      params.clear();
+      Map<String, Object> params = new HashMap<>();
       params.put("q", folderName);
 			MetadataCollection results = Account.search(testAccount, params);
 			if(results.count > 0) {
@@ -102,26 +91,13 @@ public class KloudlessTest extends KloudlessBaseTest {
 	}
 
 	@Test
-	public void testAccountRecent() throws KloudlessException {
-	  HashMap<String, Object> params = new HashMap<>();
-	  HashMap<String, Object> metadata = new HashMap<>();
-	  final String fileName = "test recent file";
-
+	public void testAccountRecent() throws KloudlessException, IOException {
+	  final String fileName = "test recent files";
 		for (String testAccount : testAccounts) {
-      metadata.put("name", fileName);
-      metadata.put("parent_id", "root");
+		  createTestFile(fileName, convertFilePath(TestInfo.getPathUploadingFile()),
+          getRootFolderId(testAccount), testAccount);
       try {
-        params.put("metadata", mapper.writeValueAsString(metadata));
-      } catch (JsonProcessingException e) {
-        e.printStackTrace();
-      }
-      params.put("file", "Hello, World!".getBytes());
-      params.put("name",fileName);
-      params.put("parent_id", "root");
-		  File.create(testAccount, params);
-
-      try {
-        Thread.sleep(5000);
+        Thread.sleep(2000);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
@@ -136,132 +112,218 @@ public class KloudlessTest extends KloudlessBaseTest {
 	@Test
   @Ignore
 	public void testAccountEvents() throws KloudlessException {
-		HashMap<String, Object> params = new HashMap<String, Object>();
-//		params.put("cursor", "after-auth");
+		HashMap<String, Object> params = new HashMap<>();
+		//params.put("cursor", "after-auth");
 		for (String testAccount : testAccounts) {
 			EventCollection events = Account.events(testAccount, null);
-			System.out.println(events);
+			if(events.count > 0) {
+			  //TODO: add assertations later if the event retrieval works
+
+      }
 
 			events = Account.events(testAccount, params);
-			System.out.println(events);
+			if(events.count > 0) {
+        //TODO: add assertations later if the event retrieval works
+      }
 		}
-	}
-
-	@Test
-  @Ignore
-	public void testTokenRetrieve() throws KloudlessException {
-		// TODO: add token retrieval test
 	}
 
 	// Begin Folder Tests
 	@Test
-  @Ignore
 	public void testFolderContents() throws KloudlessException {
+	  final String fileName = "test folder content";
 		for (String testAccount : testAccounts) {
-			MetadataCollection contents = Folder.contents("root", testAccount, null);
-			System.out.println(contents);
+		  createTestFolder(fileName, getRootFolderId(testAccount), testAccount);
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      MetadataCollection contents = Folder.contents(getRootFolderId(testAccount)
+          , testAccount, null);
+      List<Metadata> list = contents.objects.stream().filter(x -> x.name.equals(fileName))
+          .collect(Collectors.toList());
+
+      // greater one is for fear of the duplication
+      assertThat(list.size() >= 1);
 		}
 	}
 
 	@Test
-  @Ignore
 	public void testFolderRetrieve() throws KloudlessException {
-		// TODO: add folderRetrieval test
+    final String folderName = "test folder retrieve";
+    for(String testAccount : testAccounts) {
+      Folder createdFolder = createTestFolder(folderName,
+          getRootFolderId(testAccount), testAccount);
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      Folder retrieved = Folder.retrieve(createdFolder.id, testAccount, null);
+      assertThat(createdFolder.name).isEqualTo(retrieved.name);
+      assertThat(createdFolder.id).isEqualTo(retrieved.id);
+    }
 	}
 
 	@Test
-  @Ignore
 	public void testFolderSave() throws KloudlessException {
-		// TODO: add folderSave test
+    final String folderName = "test folder save";
+    final String folderNameChanged = "test folder saf\u009e";
+    for(String testAccount : testAccounts) {
+
+      Folder createdFolder = createTestFolder(folderName,
+          getRootFolderId(testAccount), testAccount);
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      createdFolder.name = folderNameChanged;
+      Map<String,Object> metadata = new HashMap<>();
+      metadata.put("parent_id",getRootFolderId(testAccount));
+      metadata.put("name",folderNameChanged);
+      Folder folderNamedChanged = Folder.save(createdFolder.id, testAccount, metadata);
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      Folder retrieved = Folder.retrieve(folderNamedChanged.id, testAccount, null);
+      assertThat(retrieved.name).isEqualTo(folderNameChanged);
+    }
 	}
 
 	@Test
-  @Ignore
 	public void testFolderCreate() throws KloudlessException {
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		params.put("name", "new new folder");
-		params.put("parent_id", "root");
-
+	  final String folderName = "test create a folder";
 		for (String testAccount : testAccounts) {
-			Folder folderInfo = Folder.create(testAccount, params);
-			System.out.println(folderInfo);
+	    Folder newFolder = createTestFolder(folderName,
+          getRootFolderId(testAccount) ,testAccount);
+	    assertThat(folderName).isEqualTo(newFolder.name);
 		}
 	}
 
 	@Test
-  @Ignore
 	public void testFolderDelete() throws KloudlessException {
-		// TODO: figure out how to test delete a folder
+	  final String folderName = "test folder deletion";
+	  for(String account : testAccounts) {
+	    Folder newFolder = createTestFolder(folderName,
+          getRootFolderId(account) , account);
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      int code = deleteTestFolder(newFolder.id, account, false, true);
+      assertThat(code).isEqualTo(204);
+    }
 	}
 
 	// Begin File Tests
 	@Test
-  @Ignore
 	public void testFileContents() throws KloudlessException, IOException {
-//		KloudlessResponse response = File.contents(
-//				"fL3N1cHBvcnQtc2FsZXNmb3JjZS5wbmc\u003d", "4", null);
 
-		// For Binary Data
-//		String path = "SOME OUTPUT PATH";
-//		ByteArrayOutputStream outputStream = response.getResponseStream();
-//		FileOutputStream out = new FileOutputStream(path);
-//		outputStream.writeTo(out);
-//		out.close();
-
-		// For String Data
-//		String path = "SOME OUTPUT PATH";
-//		String contents = response.getResponseBody();
-//		PrintWriter writer = new PrintWriter(path);
-//		writer.print(contents);
-//		writer.close();
-//		System.out.println(contents);
+	  // Binary file
+    Path path = convertFilePath(TestInfo.getPathUploadingFile());
+    long expectedSize = path.toFile().length();
+    for(String account : testAccounts ){
+      File file = createTestFile("test file content by checking the size",
+          path, getRootFolderId(account), account);
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      KloudlessResponse response = File.contents(file.id, account,null);
+      int actualSize = response.getResponseStream().size();
+      assertThat(actualSize).isEqualTo(expectedSize);
+    }
+    //TODO: text file
 	}
 
 	@Test
-  @Ignore
 	public void testFileRetrieve() throws KloudlessException {
-		// TODO: add fileRetrieve test
+	  final String fileName = "test retrieving file";
+	  for(String account : testAccounts) {
+	    File createdFile = null;
+      try {
+        createdFile = createTestFile(fileName, convertFilePath(
+            TestInfo.getPathUploadingFile()), getRootFolderId(account), account);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+      File retrievedFile = File.retrieve(createdFile.id, account,null);
+      assertThat(retrievedFile.name).isEqualTo(fileName);
+    }
 	}
 
 	@Test
-  @Ignore
-	public void testFileSave() throws KloudlessException {
-		// TODO: add fileSave test
+	public void testFileSave() throws KloudlessException, IOException {
+	  final String fileName = "test update a file";
+	  final String fileNameChanged = "file name is changed";
+	  for(String account : testAccounts) {
+	    File fileCreated = createTestFile(fileName, convertFilePath(TestInfo.getPathUploadingFile()),
+          getRootFolderId(account), account);
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+      Map<String,Object> params = new HashMap<>();
+      params.put("name", fileNameChanged);
+      params.put("parent_id", getRootFolderId(account));
+      params.put("account", account);
+
+      File.save(fileCreated.id, account, params);
+
+      File updatedFile = File.retrieve(fileCreated.id, account, null);
+      assertThat(updatedFile.name).isEqualTo(fileNameChanged);
+    }
+
 	}
 
 	@Test
-  @Ignore
-	// TODO: test
 	public void testFileCreate() throws KloudlessException, IOException {
+	  final String fileName = "test file creation";
+    Path path = convertFilePath(TestInfo.getPathUploadingFile());
+    final long size = path.toFile().length();
+	  for(String account : testAccounts) {
+	    File fileCreated = createTestFile(fileName, path, getRootFolderId(account),
+          account);
 
-		String text = "Hello, World!";
-		String path = "/tmp/new.txt";
-		PrintWriter writer = new PrintWriter(path, "UTF-8");
-		writer.println(text);
-		writer.close();
-		java.io.File f = new java.io.File(path);
-		Scanner scanner = new Scanner(f);
-		String contents = scanner.next();
-		scanner.close();
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
 
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		HashMap<String, Object> metadata = new HashMap<String, Object>();
-		metadata.put("name", "testtesttest.txt");
-		metadata.put("parent_id", "root");
-		params.put("metadata", GSON.toJson(metadata));
-		params.put("file", contents.getBytes());
-		System.out.println(params);
-
-		for (String testAccount : testAccounts) {
-			File fileInfo = File.create(testAccount, params);
-			System.out.println(fileInfo);
-		}
+      File file = File.retrieve(fileCreated.id, account, null);
+      assertThat(fileName).isEqualTo(file.name);
+      assertThat(file.size).isEqualTo(size);
+    }
 	}
 
 	@Test
-  @Ignore
-	public void testFileDelete() throws KloudlessException {
-		// TODO: figure out how to test delete a file
+	public void testFileDelete() throws KloudlessException, IOException {
+    final String fileName = "test file deletion";
+    Path path = convertFilePath(TestInfo.getPathUploadingFile());
+    final long size = path.toFile().length();
+	  for(String account : testAccounts) {
+	    File fileCreated = createTestFile(fileName, path, getRootFolderId(account),
+          account);
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+      KloudlessResponse response = File.delete(fileCreated.id, account,null);
+      int code = response.getResponseCode();
+      assertThat(code).isEqualTo(204);
+    }
 	}
 
 	// Begin Link Tests
