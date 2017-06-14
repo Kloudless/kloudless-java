@@ -28,6 +28,7 @@ public final class TestInfoHelper {
   private final static String API_SERVER_PORT_KEY = "api_server_port";
 
   private final static String ONE_TEST_ACCOUNT_JSON_KEY = "one_test_account_json";
+  private final static String PATH_UPLOADING_FILE_KEY = "path_uploading_file";
 
   private String apiKey = "";
   private String beaerToken = "";
@@ -58,6 +59,10 @@ public final class TestInfoHelper {
 
   public String getOneTestAccountJson() {
     return Props.getProperty(ONE_TEST_ACCOUNT_JSON_KEY).trim();
+  }
+
+  public String getPathUploadingFile(){
+    return Props.getProperty(PATH_UPLOADING_FILE_KEY);
   }
 
   public String getApiBasedUrl() {
