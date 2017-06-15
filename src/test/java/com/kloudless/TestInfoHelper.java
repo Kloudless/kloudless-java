@@ -15,8 +15,6 @@ import static com.kloudless.StaticImporter.Props;
  */
 public final class TestInfoHelper {
 
-  private final static String API_KEY_KEY = "api_key";
-  private final static String BEARER_TOKEN_KEY = "bearer_token";
   private final static String API_KEY_ARG = "apiKey";
   private final static String BEARER_TOKEN_ARG = "bearerToken";
   private final static String API_KEY_ENV = "API_KEY";
@@ -120,8 +118,6 @@ public final class TestInfoHelper {
       opt = Optional.ofNullable(System.getProperty(API_KEY_ARG));
       if (opt.isPresent() && opt.get().length() > 0) {
         apiKey = opt.get().trim();
-      } else {
-        apiKey = Props.getProperty(API_KEY_KEY).trim();
       }
     }
 
@@ -132,8 +128,6 @@ public final class TestInfoHelper {
       opt = Optional.ofNullable(System.getProperty(BEARER_TOKEN_ARG));
       if(opt.isPresent() && opt.get().length() > 0) {
         beaerToken = opt.get().trim();
-      } else {
-        beaerToken = Props.getProperty(BEARER_TOKEN_KEY).trim();
       }
     }
 

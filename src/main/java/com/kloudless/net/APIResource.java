@@ -329,12 +329,6 @@ public abstract class APIResource extends KloudlessObject {
         output = conn.getOutputStream();
         output.write(bytes);
         output.flush();
-
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
       } else {
         conn.setRequestProperty("Content-Type", String
             .format("application/json;charset=%s",
