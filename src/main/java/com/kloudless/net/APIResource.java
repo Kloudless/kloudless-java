@@ -557,6 +557,7 @@ public abstract class APIResource extends KloudlessObject {
 						.length() == 0)
 				&& (keys.get("developerKey") == null || keys.get("developerKey")
 						.length() == 0)
+                                && (Kloudless.bearerToken == null || Kloudless.bearerToken.length() == 0)
 				&& (keys.get("bearerToken") == null || keys.get("bearerToken")
 						.length() == 0)) {
 			throw new AuthenticationException(
