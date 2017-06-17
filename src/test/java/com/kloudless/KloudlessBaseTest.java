@@ -112,8 +112,7 @@ public abstract class KloudlessBaseTest {
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-    byte[] bytes = Files.readAllBytes(path);
-    params.put("file", bytes);
+    params.put("file", path);
     File fileCreated = File.create(testAccount, params);
     return fileCreated;
   }

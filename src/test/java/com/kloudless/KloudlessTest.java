@@ -264,9 +264,10 @@ public class KloudlessTest extends KloudlessBaseTest {
 	public void testFileSave() throws KloudlessException, IOException {
 	  final String fileName = "test update a file";
 	  final String fileNameChanged = "file name is changed";
+		Path path = convertFilePath(TestInfo.getPathUploadingFile());
 	  for(String account : testAccounts) {
-	    File fileCreated = createTestFile(fileName, convertFilePath(TestInfo.getPathUploadingFile()),
-          getRootFolderId(account), account);
+	    File fileCreated = createTestFile(fileName, path, getRootFolderId(account),
+			    account);
       try {
         Thread.sleep(2000);
       } catch (InterruptedException e) {
@@ -288,7 +289,7 @@ public class KloudlessTest extends KloudlessBaseTest {
 
 	@Test
 	public void testFileCreate() throws KloudlessException, IOException {
-	  final String fileName = "test file creation";
+	  final String fileName = "kloudless.key";
     Path path = convertFilePath(TestInfo.getPathUploadingFile());
     final long size = path.toFile().length();
 	  for(String account : testAccounts) {
@@ -298,7 +299,7 @@ public class KloudlessTest extends KloudlessBaseTest {
       try {
         Thread.sleep(2000);
       } catch (InterruptedException e) {
-        e.printStackTrace();
+      	e.printStackTrace();
       }
 
       File file = File.retrieve(fileCreated.id, account, null);
