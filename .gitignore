@@ -1,15 +1,8 @@
 .DS_Store
 
 *.class
-*.swp
-*.swh
-*.swi
-*.swj
-*.swl
-*.swm
-*.swn
-*.swo
-*.swk
+*.sw[a-z]
+*.iml
 .classpath
 .project
 .settings
@@ -27,4 +20,3 @@ hs_err_pid*
 /bin/
 .idea/**
 uiDesigner.xml
-kloudless-java.iml
