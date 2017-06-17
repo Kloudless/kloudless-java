@@ -321,8 +321,6 @@ public abstract class APIResource extends KloudlessObject {
 		} // hacky fix for create() APIKeys
 
 		FileInputStream fs = null;
-		FileChannel fileChannel = null;
-		WritableByteChannel wbc = null;
 		OutputStream output = null;
     try {
       if (params.containsKey("file")) {
@@ -380,9 +378,8 @@ public abstract class APIResource extends KloudlessObject {
       }
 	    output.flush();
     } finally {
-    	if(wbc != null) wbc.close();
+    	if(fs != null) fs.close();
 	    if(output != null) output.close();
-      if(fileChannel != null) fileChannel.close();
     }
 		return conn;
 	}
