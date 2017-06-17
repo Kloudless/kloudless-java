@@ -10,15 +10,18 @@ import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
 import com.kloudless.model.*;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import sun.net.www.protocol.https.HttpsURLConnectionImpl;
 
 import java.io.*;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -240,10 +243,9 @@ public abstract class APIResource extends KloudlessObject {
     Object target = null;
     try {
 		  if(conn instanceof HttpsURLConnectionImpl) {
-          final Field delegate = HttpsURLConnectionImpl.class
-              .getDeclaredField("delegate");
-          delegate.setAccessible(true);
-          target = delegate.get(conn);
+		    final Field delegate = HttpsURLConnectionImpl.class.getDeclaredField("delegate");
+		    delegate.setAccessible(true);
+		    target = delegate.get(conn);
       } else {
 		    target = conn;
       }
@@ -318,17 +320,57 @@ public abstract class APIResource extends KloudlessObject {
 			params = new HashMap<>();
 		} // hacky fix for create() APIKeys
 
-    OutputStream output = null;
+		FileInputStream fs = null;
+		FileChannel fileChannel = null;
+		WritableByteChannel wbc = null;
+		OutputStream output = null;
     try {
       if (params.containsKey("file")) {
         conn.setRequestProperty("X-Kloudless-Metadata", (String) params.get("metadata"));
         conn.setRequestProperty("Content-Type", "application/octet-stream");
-        byte[] bytes = (byte[]) params.get("file");
-        conn.setRequestProperty("Content-Length", String.valueOf(bytes.length));
+        // get file path
+        Path filePath = (Path) params.get("file");
+        File file = new File(filePath.toString());
+        fs = new FileInputStream(file);
+	      long fileSize = file.length();
+        conn.setRequestProperty("Content-Length", String.valueOf(fileSize));
 
         output = conn.getOutputStream();
-        output.write(bytes);
-        output.flush();
+
+	      int readSize = 6 * 1024;
+	      byte[] bytes = null;
+	      int totalRead = 0;
+	      if(fileSize < readSize) {
+		      readSize = (int) fileSize;
+	      }
+
+	      bytes = new byte[readSize];
+	      int read = fs.read(bytes, 0, readSize);
+	      int hasRead = read;
+	      int mb = 0;
+	      while(read != -1) {
+	      	output.write(bytes, 0, read);
+	      	output.flush();
+
+	      	try {
+			      Thread.sleep(20);
+		      } catch (InterruptedException e) {
+			      e.printStackTrace();
+		      }
+
+		      bytes = null;
+		      System.gc();
+		      bytes = new byte[readSize];
+		      hasRead += read;
+		      totalRead += read;
+		      //TODO: should replace following line with listeners
+		      if(hasRead >= (1024 * 1024)) {
+		      	hasRead = 0;
+		      	mb += 1;
+		      	System.out.println(mb + " sent!");
+		      }
+		      read = fs.read(bytes, 0, readSize);
+	      }
       } else {
         conn.setRequestProperty("Content-Type", String
             .format("application/json;charset=%s",
@@ -336,10 +378,11 @@ public abstract class APIResource extends KloudlessObject {
         output = conn.getOutputStream();
         output.write(GSON.toJson(params).getBytes());
       }
+	    output.flush();
     } finally {
-      if(output != null) {
-        output.close();
-      }
+    	if(wbc != null) wbc.close();
+	    if(output != null) output.close();
+      if(fileChannel != null) fileChannel.close();
     }
 		return conn;
 	}
