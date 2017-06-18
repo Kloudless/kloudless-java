@@ -22,10 +22,7 @@ import java.net.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class APIResource extends KloudlessObject {
 
@@ -320,8 +317,8 @@ public abstract class APIResource extends KloudlessObject {
 			params = new HashMap<>();
 		} // hacky fix for create() APIKeys
 
-		FileInputStream fs = null;
-		OutputStream output = null;
+		BufferedInputStream bis = null;
+		BufferedOutputStream bos = null;
     try {
       if (params.containsKey("file")) {
         conn.setRequestProperty("X-Kloudless-Metadata", (String) params.get("metadata"));
@@ -329,57 +326,55 @@ public abstract class APIResource extends KloudlessObject {
         // get file path
         Path filePath = (Path) params.get("file");
         File file = new File(filePath.toString());
-        fs = new FileInputStream(file);
+        bis = new BufferedInputStream(new FileInputStream(file));
 	      long fileSize = file.length();
         conn.setRequestProperty("Content-Length", String.valueOf(fileSize));
+	      conn.setFixedLengthStreamingMode(fileSize);
 
-        output = conn.getOutputStream();
+        bos = new BufferedOutputStream(conn.getOutputStream());
 
-	      int readSize = 6 * 1024;
+	      int readSize = 1 * 1024 * 1024;
 	      byte[] bytes = null;
-	      int totalRead = 0;
 	      if(fileSize < readSize) {
 		      readSize = (int) fileSize;
 	      }
 
 	      bytes = new byte[readSize];
-	      int read = fs.read(bytes, 0, readSize);
+	      int read = bis.read(bytes, 0, readSize);
 	      int hasRead = read;
 	      int mb = 0;
 	      while(read != -1) {
-	      	output.write(bytes, 0, read);
-	      	output.flush();
-
+	      	bos.write(bytes, 0, read);
 	      	try {
-			      Thread.sleep(20);
+			      Thread.sleep(1000);
 		      } catch (InterruptedException e) {
 			      e.printStackTrace();
 		      }
 
-		      bytes = null;
-		      System.gc();
-		      bytes = new byte[readSize];
 		      hasRead += read;
-		      totalRead += read;
 		      //TODO: should replace following line with listeners
-		      if(hasRead >= (1024 * 1024)) {
+		      if(hasRead >= readSize) {
 		      	hasRead = 0;
 		      	mb += 1;
 		      	System.out.println(mb + " sent!");
 		      }
-		      read = fs.read(bytes, 0, readSize);
+		      read = bis.read(bytes, 0, readSize);
 	      }
       } else {
         conn.setRequestProperty("Content-Type", String
             .format("application/json;charset=%s",
                 CHARSET));
-        output = conn.getOutputStream();
-        output.write(GSON.toJson(params).getBytes());
+        bos = new BufferedOutputStream(conn.getOutputStream());
+        bos.write(GSON.toJson(params).getBytes());
       }
-	    output.flush();
     } finally {
-    	if(fs != null) fs.close();
-	    if(output != null) output.close();
+    	if(bos != null) {
+    		bos.flush();
+    		bos.close();
+	    }
+	    if(bis != null) {
+    		bis.close();
+	    }
     }
 		return conn;
 	}
