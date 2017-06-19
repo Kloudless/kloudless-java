@@ -333,7 +333,7 @@ public abstract class APIResource extends KloudlessObject {
 
         bos = new BufferedOutputStream(conn.getOutputStream());
 
-	      int readSize = 1 * 1024 * 1024;
+	      int readSize = 8192;
 	      byte[] bytes = null;
 	      if(fileSize < readSize) {
 		      readSize = (int) fileSize;
@@ -343,20 +343,15 @@ public abstract class APIResource extends KloudlessObject {
 	      int read = bis.read(bytes, 0, readSize);
 	      int hasRead = read;
 	      int mb = 0;
+	      int oneMb = 1024 * 1024;
 	      while(read != -1) {
 	      	bos.write(bytes, 0, read);
-	      	try {
-			      Thread.sleep(1000);
-		      } catch (InterruptedException e) {
-			      e.printStackTrace();
-		      }
-
 		      hasRead += read;
 		      //TODO: should replace following line with listeners
-		      if(hasRead >= readSize) {
+		      if(hasRead >= oneMb) {
 		      	hasRead = 0;
 		      	mb += 1;
-		      	System.out.println(mb + " sent!");
+		      	System.out.println(mb + " mb sent!");
 		      }
 		      read = bis.read(bytes, 0, readSize);
 	      }
