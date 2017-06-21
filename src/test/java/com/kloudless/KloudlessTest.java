@@ -1,9 +1,7 @@
 package com.kloudless;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.kloudless.exception.KloudlessException;
+import com.kloudless.exception.*;
 import com.kloudless.model.*;
 import com.kloudless.net.KloudlessResponse;
 import org.junit.BeforeClass;
@@ -11,7 +9,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class KloudlessTest extends KloudlessBaseTest {
 
-	static Gson GSON = new GsonBuilder().create();
 	static List<String> testAccounts;
 
 	@BeforeClass
@@ -91,10 +87,10 @@ public class KloudlessTest extends KloudlessBaseTest {
 
 	@Test
 	public void testAccountRecent() throws KloudlessException, IOException {
-	  final String fileName = "test recent files";
+		java.io.File file1 =  new java.io.File(TestInfo.getPathUploadingFile());
+		final String fileName = file1.getName();
 		for (String testAccount : testAccounts) {
-		  createTestFile(fileName, convertFilePath(TestInfo.getPathUploadingFile()),
-          getRootFolderId(testAccount), testAccount);
+		  createTestFile(fileName, file1, getRootFolderId(testAccount), testAccount);
       try {
         Thread.sleep(2000);
       } catch (InterruptedException e) {
@@ -224,17 +220,17 @@ public class KloudlessTest extends KloudlessBaseTest {
 	public void testFileContents() throws KloudlessException, IOException {
 
 	  // Binary file
-    Path path = convertFilePath(TestInfo.getPathUploadingFile());
-    long expectedSize = path.toFile().length();
+		java.io.File file1 =  new java.io.File(TestInfo.getPathUploadingFile());
+    long expectedSize = file1.length();
     for(String account : testAccounts ){
-      File file = createTestFile("test file content by checking the size",
-          path, getRootFolderId(account), account);
+      File fileCreated = createTestFile("test file content by checking the size",
+          file1, getRootFolderId(account), account);
       try {
         Thread.sleep(2000);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
-      KloudlessResponse response = File.contents(file.id, account,null);
+      KloudlessResponse response = File.contents(fileCreated.id, account,null);
       long actualSize = response.getResponseStream().size();
       assertThat(actualSize).isEqualTo(expectedSize);
     }
@@ -246,9 +242,9 @@ public class KloudlessTest extends KloudlessBaseTest {
 	  final String fileName = "test retrieving file";
 	  for(String account : testAccounts) {
 	    File createdFile = null;
+	    java.io.File file = new java.io.File(TestInfo.getPathUploadingFile());
       try {
-        createdFile = createTestFile(fileName, convertFilePath(
-            TestInfo.getPathUploadingFile()), getRootFolderId(account), account);
+        createdFile = createTestFile(fileName, file , getRootFolderId(account), account);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -262,9 +258,9 @@ public class KloudlessTest extends KloudlessBaseTest {
 	public void testFileSave() throws KloudlessException, IOException {
 	  final String fileName = "test update a file";
 	  final String fileNameChanged = "file name is changed";
-		Path path = convertFilePath(TestInfo.getPathUploadingFile());
+		java.io.File file = new java.io.File(TestInfo.getPathUploadingFile());
 	  for(String account : testAccounts) {
-	    File fileCreated = createTestFile(fileName, path, getRootFolderId(account),
+	    File fileCreated = createTestFile(fileName, file, getRootFolderId(account),
 			    account);
       try {
         Thread.sleep(2000);
@@ -288,10 +284,10 @@ public class KloudlessTest extends KloudlessBaseTest {
 	@Test
 	public void testFileCreate() throws KloudlessException, IOException {
 	  final String fileName = "kloudless.key";
-    Path path = convertFilePath(TestInfo.getPathUploadingFile());
-    final long size = path.toFile().length();
+    java.io.File file1 = new java.io.File(TestInfo.getPathUploadingFile());
+    final long size = file1.length();
 	  for(String account : testAccounts) {
-	    File fileCreated = createTestFile(fileName, path, getRootFolderId(account),
+	    File fileCreated = createTestFile(fileName, file1, getRootFolderId(account),
           account);
 
       try {
@@ -300,19 +296,19 @@ public class KloudlessTest extends KloudlessBaseTest {
       	e.printStackTrace();
       }
 
-      File file = File.retrieve(fileCreated.id, account, null);
-      assertThat(fileName).isEqualTo(file.name);
-      assertThat(file.size).isEqualTo(size);
+      File fileRetrieved = File.retrieve(fileCreated.id, account, null);
+      assertThat(fileName).isEqualTo(fileRetrieved.name);
+      assertThat(fileRetrieved.size).isEqualTo(size);
     }
 	}
 
 	@Test
 	public void testFileDelete() throws KloudlessException, IOException {
     final String fileName = "test file deletion";
-    Path path = convertFilePath(TestInfo.getPathUploadingFile());
-    final long size = path.toFile().length();
+		java.io.File file1 = new java.io.File(TestInfo.getPathUploadingFile());
+    final long size = file1.length();
 	  for(String account : testAccounts) {
-	    File fileCreated = createTestFile(fileName, path, getRootFolderId(account),
+	    File fileCreated = createTestFile(fileName, file1, getRootFolderId(account),
           account);
       try {
         Thread.sleep(2000);
@@ -323,6 +319,63 @@ public class KloudlessTest extends KloudlessBaseTest {
       KloudlessResponse response = File.delete(fileCreated.id, account,null);
       int code = response.getResponseCode();
       assertThat(code).isEqualTo(204);
+    }
+	}
+
+	@Test
+	public void testMultipartUpload() throws APIException, AuthenticationException,
+			InvalidRequestException, APIConnectionException {
+
+		java.io.File file =  new java.io.File(TestInfo.getPathUploadingFile());
+		HashMap<String, Object> params = new HashMap<>();
+		HashMap<String, String> keys = new HashMap<>();
+
+
+    for(String account : testAccounts) {
+    	params.clear();
+    	keys.clear();;
+	    params.put("name", file.getName());
+	    params.put("parent_id", getRootFolderId(account));
+	    params.put("size", file.length());
+
+	    keys.put("overwrite","true");
+
+	    File.Multipart multipart = File.initializeMultipartUpload(account, params, keys);
+	    assertThat(multipart.getId() > 0);
+	    assertThat(multipart.getAccount()).isEqualTo(account);
+	    assertThat(multipart.getPartSize()).isGreaterThan(0);
+	    assertThat(multipart.getPartCount()).isEqualTo(
+			    (int)Math.ceil((double)multipart.getOriginalFileSize()/multipart.getPartSize()));
+
+	    assertThat(multipart.getPartCount()).isGreaterThanOrEqualTo(1);
+	    assertThat(multipart.getPartCount()).isLessThanOrEqualTo(10000);
+
+	    for(int part_number = 1; part_number <= multipart.getPartCount(); part_number++) {
+		    params.clear();
+		    params.put("part_id", multipart.getId());
+		    params.put("part_number", part_number);
+		    params.put("file", file);
+		    params.put("part_size",multipart.getPartSize());
+		    KloudlessResponse response = File.multipartUpload(account,params);
+		    assertThat(response.getResponseCode()).isEqualTo(200);
+
+		    if(part_number == 1) { // test retrieve multipart upload status
+			    File.Multipart multipartStatus = File.retrieveMultipartUploadInfo(
+			    		account, multipart.getId());
+			    assertThat(multipartStatus.getId()).isEqualTo(multipart.getId());
+			    assertThat(multipartStatus.getAccount()).isEqualTo(multipart.getAccount());
+		    }
+
+		    try {
+			    Thread.sleep(1000);
+		    } catch (InterruptedException e) {
+			    e.printStackTrace();
+		    }
+	    }
+	    File mergedFile = File.finalizeMultipartUpload(account, multipart.getId());
+	    assertThat(mergedFile.name).isEqualTo(file.getName());
+	    assertThat(mergedFile.size).isEqualTo(file.length());
+
     }
 	}
 
