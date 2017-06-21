@@ -8,20 +8,15 @@ import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
 import com.kloudless.model.File;
 import com.kloudless.model.Folder;
-import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
 
 /**
  * Created by gchiou on 09/06/2017.
@@ -91,12 +86,8 @@ public abstract class KloudlessBaseTest {
   }
 
 
-  protected Path convertFilePath(final String path) {
-    return Paths.get(path).normalize();
-  }
-
   protected File createTestFile(final String fileName,
-                                final Path path,
+                                final java.io.File file,
                                 final String parentId,
                                 final String testAccount)
       throws APIException, AuthenticationException, InvalidRequestException,
@@ -112,7 +103,7 @@ public abstract class KloudlessBaseTest {
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-    params.put("file", path);
+    params.put("file", file);
     File fileCreated = File.create(testAccount, params);
     return fileCreated;
   }
