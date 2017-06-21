@@ -19,10 +19,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
-import java.nio.channels.FileChannel;
-import java.nio.channels.WritableByteChannel;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 public abstract class APIResource extends KloudlessObject {
 
@@ -289,7 +289,62 @@ public abstract class APIResource extends KloudlessObject {
 		OutputStream output = null;
 		// put in body the data for a PUT
 		try {
-			if (params.containsKey("body")) {
+			if(params.containsKey("file")) {
+				java.io.File file = (File) params.get("file");
+				final int partNum = (int)params.get("part_number");
+				final long partSize = (long)params.get("part_size");
+				long endPosition = partNum * partSize;
+				long startPos = 0;
+				int readSize = 8192;
+				if(endPosition > file.length()) {
+					startPos = endPosition - partSize;
+					endPosition = file.length();
+				} else {
+					startPos = endPosition - partSize;
+				}
+				conn.setRequestProperty("Content-Type", "application/octet-stream");
+
+				long contentLength = endPosition - startPos;
+				conn.setRequestProperty("Content-Length", String.valueOf(contentLength));
+				conn.setFixedLengthStreamingMode(contentLength);
+
+				try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+				    BufferedOutputStream bos = new BufferedOutputStream(conn.getOutputStream())) {
+
+					long skip = 0;
+
+					//TODO: not sure this while loop is needed since haven't encountered
+					//      skip < startPos issue
+					while ((skip = bis.skip(startPos)) < startPos) {
+						skip = bis.skip(startPos - skip);
+					}
+
+					byte[] bytes = new byte[readSize];
+
+					int read = bis.read(bytes, 0, readSize);
+					int bytesSent = 0;
+					while(read != -1 && bytesSent < contentLength) {
+						bos.write(bytes, 0, read);
+						bytesSent += read;
+						if((contentLength - bytesSent) < readSize) {
+							readSize = (int)(contentLength - bytesSent);
+							if(readSize > 0) {
+								read = bis.read(bytes, 0, readSize);
+								bos.write(bytes, 0, read);
+							}
+							read = -1;
+						} else {
+							read = bis.read(bytes, 0, readSize);
+						}
+					}
+					if(read > 0) {
+						bos.write(bytes, 0, read);
+					}
+					bos.flush();
+				} catch(IOException ex) {
+					throw ex;
+				}
+			} else if (params.containsKey("body")) {
 				output = conn.getOutputStream();
 				output.write((byte[]) params.get("body"));
 			} else {
@@ -324,8 +379,7 @@ public abstract class APIResource extends KloudlessObject {
         conn.setRequestProperty("X-Kloudless-Metadata", (String) params.get("metadata"));
         conn.setRequestProperty("Content-Type", "application/octet-stream");
         // get file path
-        Path filePath = (Path) params.get("file");
-        File file = new File(filePath.toString());
+        File file = (java.io.File)params.get("file");
         bis = new BufferedInputStream(new FileInputStream(file));
 	      long fileSize = file.length();
         conn.setRequestProperty("Content-Length", String.valueOf(fileSize));
@@ -360,7 +414,8 @@ public abstract class APIResource extends KloudlessObject {
             .format("application/json;charset=%s",
                 CHARSET));
         bos = new BufferedOutputStream(conn.getOutputStream());
-        bos.write(GSON.toJson(params).getBytes());
+        String json = GSON.toJson(params);
+        bos.write(json.getBytes());
       }
     } finally {
     	if(bos != null) {
