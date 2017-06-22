@@ -381,6 +381,44 @@ public class KloudlessTest extends KloudlessBaseTest {
     }
 	}
 
+	@Test
+	public void testAbortMultipartUplad() throws APIException,
+			InvalidRequestException, AuthenticationException, APIConnectionException {
+
+		java.io.File file =  new java.io.File(TestInfo.getPathUploadingFile());
+		HashMap<String, Object> params = new HashMap<>();
+		HashMap<String, String> keys = new HashMap<>();
+
+		for(String account : testAccounts) {
+			params.clear();
+			keys.clear();;
+			params.put("name", file.getName());
+			params.put("parent_id", getRootFolderId(account));
+			params.put("size", file.length());
+
+			keys.put("overwrite","true");
+
+			File.Multipart multipart = File.initializeMultipartUpload(account, params, keys);
+			assertThat(multipart.getId() > 0);
+			assertThat(multipart.getAccount()).isEqualTo(account);
+			assertThat(multipart.getPartSize()).isGreaterThan(0);
+			assertThat(multipart.getPartCount()).isEqualTo(
+					(int)Math.ceil((double)multipart.getOriginalFileSize()/multipart.getPartSize()));
+
+			assertThat(multipart.getPartCount()).isGreaterThanOrEqualTo(1);
+			assertThat(multipart.getPartCount()).isLessThanOrEqualTo(10000);
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			KloudlessResponse response = File.abortMultipartUpload(account, multipart.getId());
+			assertThat(response.getResponseCode()).isEqualTo(204);
+		}
+	}
+
 	// Begin Link Tests
 	@Test
   @Ignore
