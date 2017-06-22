@@ -319,7 +319,7 @@ public class File extends Metadata {
 
 
 	/**
-	 * Multipart upload is a POJO for the inforation of multipart upload
+	 * Multipart upload is a POJO for the information of a multipart upload resource
 	 */
 	public class Multipart {
 
@@ -329,26 +329,57 @@ public class File extends Metadata {
 		private boolean parallelUploads;
 		private long originalFileSize;
 
+		/**
+		 * Returns the id of a new multipart upload resource with which will be used to interact
+		 *
+		 * @return the id of a new multipart upload resource
+		 */
 		public int getId() {
 			return id;
 		}
 
+		/**
+		 * Sets the id for a new multipart upload resource
+		 *
+		 * @param id the id for a new multipart upload resource
+		 */
 		public void setId(int id) {
 			this.id = id;
 		}
 
+		/**
+		 * Returns the account that a multipart upload is associated with.
+		 *
+		 * @return the account that a multipart upload is associated with.
+		 */
 		public String getAccount() {
 			return account;
 		}
 
+		/**
+		 * Sets the account to associate with a multipart upload resource
+		 *
+		 * @param account the account associates with a multipart upload resource
+		 */
 		public void setAccount(String account) {
 			this.account = account;
 		}
 
+		/**
+		 * Returns a number in <code>long</code> indicating the size of each part
+		 * but the last to be uploaded.
+		 *
+		 * @return the number indicates the size of the each part but the last
+		 */
 		public long getPartSize() {
 			return partSize;
 		}
 
+		/**
+		 * Returns a number indicating the count of parts to be uploaded
+		 *
+		 * @return a number indicateing the count of parts to be uploaded
+		 */
 		public int getPartCount() {
 			return (int) Math.ceil((double)this.originalFileSize / getPartSize());
 		}
@@ -357,18 +388,42 @@ public class File extends Metadata {
 			this.originalFileSize = originalFileSize;
 		}
 
+		/**
+		 * Returns the original size of a file before uploading
+		 *
+		 * @return the origianl size of a file
+		 */
 		public long getOriginalFileSize() {
 			return this.originalFileSize;
 		}
 
+		/**
+		 * Sets the size of each part but the last
+		 *
+		 * @param partSize the size of a each part but the last
+		 */
 		public void setPartSize(long partSize) {
 			this.partSize = partSize;
 		}
 
+
+		/**
+		 * Returns a boolean value determining whether the chunks can be
+		 * uploaded in parallel. If <code>false</code> then each chunks must be uploaded
+		 * serially.
+		 *
+		 * @return <code>true</code> if paralell uploaded is allowed. Otherwise,
+		 *         chunks must be uploaded serially
+		 */
 		public boolean isParallelUploads() {
 			return parallelUploads;
 		}
 
+		/**
+		 * Sets if parallel uploading is allowed for chunks
+		 *
+		 * @param parallelUploads
+		 */
 		public void setParallelUploads(boolean parallelUploads) {
 			this.parallelUploads = parallelUploads;
 		}
