@@ -323,7 +323,7 @@ public abstract class APIResource extends KloudlessObject {
 
 					int read = bis.read(bytes, 0, readSize);
 					int bytesSent = 0;
-					while(read != -1 && bytesSent < contentLength) {
+					while(read > 0 && bytesSent < contentLength) {
 						bos.write(bytes, 0, read);
 						bytesSent += read;
 						if((contentLength - bytesSent) < readSize) {
@@ -353,6 +353,8 @@ public abstract class APIResource extends KloudlessObject {
 				output = conn.getOutputStream();
 				output.write(GSON.toJson(params).getBytes());
 			}			
+		} catch(IOException ex) {
+			throw ex;
 		} finally {
 			if (output != null) {
 				output.close();

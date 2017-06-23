@@ -1,5 +1,6 @@
 package com.kloudless.model;
 
+import com.google.gson.annotations.SerializedName;
 import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
@@ -196,12 +197,12 @@ public class File extends Metadata {
 	 * Make a Kloudless API request to initialize the session of multipart upload
 	 *
 	 * @param accountId the account id
-	 * @param params the parameters include
-	 *    - name - The name of the file to upload
-	 *    - parent_id - The ID of the parent folder to upload the file to
-	 *    - size - The total size of the file being uploaded
-	 * @param keys query parameters
-	 *    - overwrite - overwrite a existing file
+	 * @param params    the parameters include
+	 *    - name        The name of the file to upload
+	 *    - parent_id   The ID of the parent folder to upload the file to
+	 *    - size        The total size of the file being uploaded
+	 * @param keys      query parameters
+	 *    - overwrite   overwrite a existing file
 	 * @return {@code File.Multipart}
 	 * @throws InvalidRequestException
 	 * @throws APIException
@@ -214,7 +215,11 @@ public class File extends Metadata {
 			    AuthenticationException {
 
 		String path = String.format("%s/storage/multipart",
-				instanceURL(Account.class, accountId));
+				instanceURL(Account.class, String.valueOf(accountId)));
+
+		if(keys.containsKey("overwrite")) {
+			path += "?overwrite";
+		}
 
 		File.Multipart multipart = create(path, params, File.Multipart.class, keys);
 		multipart.setOriginalFileSize((Long) params.get("size"));
@@ -225,43 +230,51 @@ public class File extends Metadata {
 	/**
 	 * Make a Kloudless API request to upload parts of a file
 	 *
-	 * @param accountId the account id
-	 * @param params the parameters include
-	 *     - part_id  - the session id of the multipart upload
-	 *     - part_num - corresponds to the order in which the part appears in the original file.
+	 * @param accountId   the account id
+	 * @param params      the parameters include
+	 *     - session_id   the session id of the multipart upload
+	 *     - file         {@link java.io.File} to be uploaded
+	 *     - part_size    the size of each part
+	 *     - part_number  the part will be uploaded
+	 * @param keys        the keys include
+	 *     - part_number  the part will be uploaded
 	 * @return {@code KloudlessResponse}
 	 * @throws InvalidRequestException
 	 * @throws APIException
 	 * @throws APIConnectionException
 	 * @throws AuthenticationException
 	 */
-	public static KloudlessResponse multipartUpload(String accountId, Map<String, Object> params)
+	public static KloudlessResponse multipartUpload(String accountId,
+	    Map<String, Object> params, Map<String, String> keys)
 			throws InvalidRequestException, APIException, APIConnectionException,
 			    AuthenticationException {
 
-		String path = String.format("%s/storage/multipart/%d?part_number=%d",
-				instanceURL(Account.class, accountId), (int)params.get("part_id"),
-				(int)params.get("part_number"));
-		KloudlessResponse response = request(RequestMethod.PUT, path, params, null);
+		String path = String.format("%s/storage/multipart/%s?part_number=%s",
+				instanceURL(Account.class, accountId), String.valueOf(params.get("session_id")),
+				String.valueOf(keys.get("part_number")));
+		KloudlessResponse response = request(RequestMethod.PUT, path, params, keys);
 		return response;
 	}
 
 	/**
-	 * Make a Klouldless API request to finalize the multipart upload
+	 * Make a Kloudless API request to finalize the multipart upload
 	 *
-	 * @param accountId the account id
-	 * @param partId the session id of the multipart upload
+	 * @param accountId   the account id
+	 * @param params      the parameters include
+	 *     - session_id   session_id of the multipart upload
 	 * @return {@code File}
 	 * @throws InvalidRequestException
 	 * @throws APIException
 	 * @throws APIConnectionException
 	 * @throws AuthenticationException
 	 */
-	public static File finalizeMultipartUpload(String accountId, int partId)
+	public static File finalizeMultipartUpload(String accountId,
+	    Map<String, Object> params)
 			throws InvalidRequestException, APIException, APIConnectionException,
 			AuthenticationException {
-		String path = String.format("%s/storage/multipart/%d/complete",
-				instanceURL(Account.class, accountId), partId);
+
+		String path = String.format("%s/storage/multipart/%s/complete",
+				instanceURL(Account.class, accountId), String.valueOf(params.get("session_id")));
 		KloudlessResponse response = request(RequestMethod.POST, path, null, null);
 		int rCode = response.getResponseCode();
 		String rBody = response.getResponseBody();
@@ -272,22 +285,24 @@ public class File extends Metadata {
 	}
 
 	/**
-	 * Make a Kloudless API request to retrive current status of the multipart upload
+	 * Make a Kloudless API request to retrieve current status of the multipart upload
 	 *
-	 * @param account the account id
-	 * @param partId the session id of the multipart upload
+	 * @param account     the account id
+	 * @param params      the parameters include
+	 *      - sessions_id the session id of the multipart upload
 	 * @return {@code File.Multipart}
 	 * @throws InvalidRequestException
 	 * @throws APIException
 	 * @throws APIConnectionException
 	 * @throws AuthenticationException
 	 */
-	public static Multipart retrieveMultipartUploadInfo(String account, int partId)
+	public static Multipart retrieveMultipartUploadInfo(String account,
+			Map<String, Object> params)
 			throws InvalidRequestException, APIException, APIConnectionException,
 			AuthenticationException {
 
-		String path = String.format("%s/storage/multipart/%d",
-				instanceURL(Account.class, account), partId);
+		String path = String.format("%s/storage/multipart/%s",
+				instanceURL(Account.class, account), String.valueOf(params.get("session_id")));
 		KloudlessResponse response = request(RequestMethod.GET, path, null,null);
 		int rCode = response.getResponseCode();
 		String rBody = response.getResponseBody();
@@ -301,19 +316,21 @@ public class File extends Metadata {
 	/**
 	 * Make a Kloudless API request to abort the multipart upload session
 	 *
-	 * @param account the account id
-	 * @param partId the session id of the multipart upload
+	 * @param account     the account id
+	 * @param params      the parameters include
+	 *      - session_id  the session id of the multipart upload
 	 * @return {@code KloudlessResponse}
 	 * @throws InvalidRequestException
 	 * @throws APIException
 	 * @throws APIConnectionException
 	 * @throws AuthenticationException
 	 */
-	public static KloudlessResponse abortMultipartUpload(String account, int partId)
+	public static KloudlessResponse abortMultipartUpload(String account,
+      Map<String, Object> params)
 			throws InvalidRequestException, APIException, APIConnectionException,
 			AuthenticationException {
-		String path = String.format("%s/storage/multipart/%d",
-				instanceURL(Account.class, account), partId);
+		String path = String.format("%s/storage/multipart/%s",
+				instanceURL(Account.class, account), String.valueOf(params.get("session_id")));
 		return delete(path, new Hashtable<>(),null);
 	}
 
@@ -378,7 +395,7 @@ public class File extends Metadata {
 		/**
 		 * Returns a number indicating the count of parts to be uploaded
 		 *
-		 * @return a number indicateing the count of parts to be uploaded
+		 * @return a number indicating the count of parts to be uploaded
 		 */
 		public int getPartCount() {
 			return (int) Math.ceil((double)this.originalFileSize / getPartSize());
@@ -391,7 +408,7 @@ public class File extends Metadata {
 		/**
 		 * Returns the original size of a file before uploading
 		 *
-		 * @return the origianl size of a file
+		 * @return the original size of a file
 		 */
 		public long getOriginalFileSize() {
 			return this.originalFileSize;
@@ -412,7 +429,7 @@ public class File extends Metadata {
 		 * uploaded in parallel. If <code>false</code> then each chunks must be uploaded
 		 * serially.
 		 *
-		 * @return <code>true</code> if paralell uploaded is allowed. Otherwise,
+		 * @return <code>true</code> if parallel uploaded is allowed. Otherwise,
 		 *         chunks must be uploaded serially
 		 */
 		public boolean isParallelUploads() {
