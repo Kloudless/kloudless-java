@@ -335,7 +335,8 @@ public class KloudlessTest extends KloudlessBaseTest {
 
     for(String account : testAccounts) {
     	params.clear();
-    	keys.clear();;
+    	keys.clear();
+
 	    params.put("name", file.getName());
 	    params.put("parent_id", getRootFolderId(account));
 	    params.put("size", file.length());
@@ -354,16 +355,20 @@ public class KloudlessTest extends KloudlessBaseTest {
 
 	    for(int part_number = 1; part_number <= multipart.getPartCount(); part_number++) {
 		    params.clear();
-		    params.put("part_id", multipart.getId());
-		    params.put("part_number", part_number);
+		    keys.clear();
+
+		    params.put("session_id", String.valueOf(multipart.getId()));
 		    params.put("file", file);
-		    params.put("part_size",multipart.getPartSize());
-		    KloudlessResponse response = File.multipartUpload(account,params);
+		    params.put("part_number", part_number);
+		    params.put("part_size", multipart.getPartSize());
+
+		    keys.put("part_number", String.valueOf(part_number));
+
+		    KloudlessResponse response = File.multipartUpload(account, params, keys);
 		    assertThat(response.getResponseCode()).isEqualTo(200);
 
 		    if(part_number == 1) { // test retrieve multipart upload status
-			    File.Multipart multipartStatus = File.retrieveMultipartUploadInfo(
-			    		account, multipart.getId());
+			    File.Multipart multipartStatus = File.retrieveMultipartUploadInfo(account, params);
 			    assertThat(multipartStatus.getId()).isEqualTo(multipart.getId());
 			    assertThat(multipartStatus.getAccount()).isEqualTo(multipart.getAccount());
 		    }
@@ -374,7 +379,7 @@ public class KloudlessTest extends KloudlessBaseTest {
 			    e.printStackTrace();
 		    }
 	    }
-	    File mergedFile = File.finalizeMultipartUpload(account, multipart.getId());
+	    File mergedFile = File.finalizeMultipartUpload(account, params);
 	    assertThat(mergedFile.name).isEqualTo(file.getName());
 	    assertThat(mergedFile.size).isEqualTo(file.length());
 
@@ -413,8 +418,10 @@ public class KloudlessTest extends KloudlessBaseTest {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			params.clear();
+			params.put("session_id", multipart.getId());
 
-			KloudlessResponse response = File.abortMultipartUpload(account, multipart.getId());
+			KloudlessResponse response = File.abortMultipartUpload(account, params);
 			assertThat(response.getResponseCode()).isEqualTo(204);
 		}
 	}
