@@ -69,12 +69,6 @@ public class KloudlessTest extends KloudlessBaseTest {
 	  final String folderName = "new test fold\u00e9r";
 		for (String testAccount : testAccounts) {
 		  createTestFolder(folderName, getRootFolderId(testAccount), testAccount);
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-
       Map<String, Object> params = new HashMap<>();
       params.put("q", folderName);
 			MetadataCollection results = Account.search(testAccount, params);
@@ -92,12 +86,6 @@ public class KloudlessTest extends KloudlessBaseTest {
 		final String fileName = file1.getName();
 		for (String testAccount : testAccounts) {
 		  createTestFile(fileName, file1, getRootFolderId(testAccount), testAccount);
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-
 			FileCollection results = Account.recent(testAccount, null);
       List<Metadata> list = results.objects.stream().filter(x->x.name.equals(fileName))
           .collect(Collectors.toList());
@@ -113,13 +101,13 @@ public class KloudlessTest extends KloudlessBaseTest {
 		for (String testAccount : testAccounts) {
 			EventCollection events = Account.events(testAccount, null);
 			if(events.count > 0) {
-			  //TODO: add assertations later if the event retrieval works
+			  //TODO: add asserts later if the event retrieval works
 
       }
 
 			events = Account.events(testAccount, params);
 			if(events.count > 0) {
-        //TODO: add assertations later if the event retrieval works
+        //TODO: add asserts later if the event retrieval works
       }
 		}
 	}
@@ -130,11 +118,7 @@ public class KloudlessTest extends KloudlessBaseTest {
 	  final String fileName = "test folder content";
 		for (String testAccount : testAccounts) {
 		  createTestFolder(fileName, getRootFolderId(testAccount), testAccount);
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
+      
       MetadataCollection contents = Folder.contents(getRootFolderId(testAccount)
           , testAccount, null);
       List<Metadata> list = contents.objects.stream().filter(x -> x.name.equals(fileName))
@@ -151,11 +135,7 @@ public class KloudlessTest extends KloudlessBaseTest {
     for(String testAccount : testAccounts) {
       Folder createdFolder = createTestFolder(folderName,
           getRootFolderId(testAccount), testAccount);
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
+      
       Folder retrieved = Folder.retrieve(createdFolder.id, testAccount, null);
       assertThat(createdFolder.name).isEqualTo(retrieved.name);
       assertThat(createdFolder.id).isEqualTo(retrieved.id);
@@ -175,17 +155,12 @@ public class KloudlessTest extends KloudlessBaseTest {
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
-<<<<<<< HEAD
       createdFolder.name = folderNameChanged;
       Map<String,Object> metadata = new HashMap<>();
       metadata.put("parent_id",getRootFolderId(testAccount));
       metadata.put("name",folderNameChanged);
       Folder folderNamedChanged = Folder.save(createdFolder.id, testAccount, metadata);
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
+      
       Folder retrieved = Folder.retrieve(folderNamedChanged.id, testAccount, null);
       assertThat(retrieved.name).isEqualTo(folderNameChanged);
     }
@@ -207,11 +182,7 @@ public class KloudlessTest extends KloudlessBaseTest {
 	  for(String account : testAccounts) {
 	    Folder newFolder = createTestFolder(folderName,
           getRootFolderId(account) , account);
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
+      
       int code = deleteTestFolder(newFolder.id, account, false, true);
       assertThat(code).isEqualTo(204);
     }
@@ -227,11 +198,7 @@ public class KloudlessTest extends KloudlessBaseTest {
     for(String account : testAccounts ){
       File fileCreated = createTestFile("test file content by checking the size",
           file1, getRootFolderId(account), account);
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
+      
       KloudlessResponse response = File.contents(fileCreated.id, account,null);
       long actualSize = response.getResponseStream().size();
       assertThat(actualSize).isEqualTo(expectedSize);
@@ -264,11 +231,6 @@ public class KloudlessTest extends KloudlessBaseTest {
 	  for(String account : testAccounts) {
 	    File fileCreated = createTestFile(fileName, file, getRootFolderId(account),
 			    account);
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
 
       Map<String,Object> params = new HashMap<>();
       params.put("name", fileNameChanged);
@@ -292,12 +254,6 @@ public class KloudlessTest extends KloudlessBaseTest {
 	    File fileCreated = createTestFile(fileName, file1, getRootFolderId(account),
           account);
 
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-      	e.printStackTrace();
-      }
-
       File fileRetrieved = File.retrieve(fileCreated.id, account, null);
       assertThat(fileName).isEqualTo(fileRetrieved.name);
       assertThat(fileRetrieved.size).isEqualTo(size);
@@ -312,11 +268,6 @@ public class KloudlessTest extends KloudlessBaseTest {
 	  for(String account : testAccounts) {
 	    File fileCreated = createTestFile(fileName, file1, getRootFolderId(account),
           account);
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
 
       KloudlessResponse response = File.delete(fileCreated.id, account,null);
       int code = response.getResponseCode();
@@ -331,7 +282,6 @@ public class KloudlessTest extends KloudlessBaseTest {
 		java.io.File file =  new java.io.File(TestInfo.getPathUploadingFile());
 		HashMap<String, Object> params = new HashMap<>();
 		HashMap<String, String> keys = new HashMap<>();
-
 
     for(String account : testAccounts) {
     	params.clear();
@@ -372,12 +322,7 @@ public class KloudlessTest extends KloudlessBaseTest {
 			    assertThat(multipartStatus.getId()).isEqualTo(multipart.getId());
 			    assertThat(multipartStatus.getAccount()).isEqualTo(multipart.getAccount());
 		    }
-
-		    try {
-			    Thread.sleep(1000);
-		    } catch (InterruptedException e) {
-			    e.printStackTrace();
-		    }
+		    
 	    }
 	    File mergedFile = File.finalizeMultipartUpload(account, params);
 	    assertThat(mergedFile.name).isEqualTo(file.getName());
@@ -412,12 +357,7 @@ public class KloudlessTest extends KloudlessBaseTest {
 
 			assertThat(multipart.getPartCount()).isGreaterThanOrEqualTo(1);
 			assertThat(multipart.getPartCount()).isLessThanOrEqualTo(10000);
-
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			
 			params.clear();
 			params.put("session_id", multipart.getId());
 
