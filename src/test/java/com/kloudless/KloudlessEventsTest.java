@@ -17,8 +17,11 @@ import java.util.List;
 import static com.kloudless.StaticImporter.TestInfo;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class KloudlessEventsTest {
+import static com.kloudless.StaticImporter.TestInfo;
+import static org.assertj.core.api.Assertions.assertThat;
 
+public class KloudlessEventsTest {
+	
 	static Gson GSON = new GsonBuilder().create();
 	static List<String> accounts = new ArrayList<>();
 	HashMap<String, Object> params = new HashMap<>();
@@ -26,16 +29,16 @@ public class KloudlessEventsTest {
 	
 	@BeforeClass
 	public static void setUp() {
-	  Kloudless.overrideApiBase(TestInfo.getApiBasedUrl());
+		Kloudless.overrideApiBase(TestInfo.getApiBasedUrl());
 		Kloudless.apiKey = TestInfo.getApiKey();
 		accounts = TestInfo.getTestAccounts();
 	}
-
+	
 	@Test
-	public void testCreateEvents() throws KloudlessException,
-			FileNotFoundException, UnsupportedEncodingException, InterruptedException {
+	public void testCreateEvents() throws KloudlessException, FileNotFoundException,
+			UnsupportedEncodingException, InterruptedException {
 		for (String account : accounts) {
-
+			
 			// Create Folder
 			params.clear();
 			params.put("name", "create folder event");
@@ -44,7 +47,7 @@ public class KloudlessEventsTest {
 			assertThat(createdFolder.id).isNotEmpty();
 			assertThat(createdFolder.parent.Id).isEqualTo("root");
 			assertThat(createdFolder.name).isEqualTo("create folder event");
-
+			
 			// Create Nested Folder
 			params.clear();
 			params.put("name", "create nested folder event");
@@ -64,7 +67,7 @@ public class KloudlessEventsTest {
 			params.clear();
 			KloudlessResponse resp = Folder.delete(renamedNestedFolder.id, account, null);
 			assertThat(resp.getResponseCode()).isEqualTo(204);
-
+			
 			// Create File
 			params.clear();
 			metadata.clear();
@@ -81,7 +84,7 @@ public class KloudlessEventsTest {
 			params.put("body", "Hello, World! Hello, World!".getBytes());
 			File updatedFile = File.update(createdFile.id, account, params);
 			assertThat(updatedFile.size).isGreaterThan(createdFile.size);
-
+			
 			// Create Nested File
 			params.clear();
 			metadata.clear();
@@ -92,7 +95,7 @@ public class KloudlessEventsTest {
 			File nestedFile = File.create(account, params);
 			assertThat(nestedFile.id).isNotEmpty();
 			assertThat(createdFolder.id).isEqualTo(nestedFile.parent.Id);
-
+			
 			// Copy Nested File
 			params.clear();
 			params.put("parent_id", createdFolder.id);
@@ -119,32 +122,32 @@ public class KloudlessEventsTest {
 			assertThat(resp.getResponseCode()).isEqualTo(204);
 		}
 	}
-
+	
 	// Test Recent Files
 	@Test
 	public void testAccountRecent() throws KloudlessException {
 		for (String account : accounts) {
 			FileCollection results = Account.recent(account, null);
-			if(results.count > 0) {
-        System.out.println("There are " + results.count + " files or folders" +
-            " belonging to account " + account + " recently changed!");
-        assertThat(results.total).isEqualTo(results.objects.size());
-        results.objects.stream().forEach(x -> {
-          assertThat(x.account).isEqualTo(Long.valueOf(account));
-        });
+			if (results.count > 0) {
+				System.out.println("There are " + results.count + " files or folders" +
+						" belonging to account " + account + " recently changed!");
+				assertThat(results.total).isEqualTo(results.objects.size());
+				results.objects.stream().forEach(x -> {
+					assertThat(x.account).isEqualTo(Long.valueOf(account));
+				});
 			}
 		}
 	}
-
+	
 	// Test Events
 	@Test
 	public void testEventsRetrieval() throws KloudlessException {
 		for (String account : accounts) {
-		  params.clear();
+			params.clear();
 			EventCollection events = Account.events(account, params);
 			//TODO: will test later if getting better understanding of event on backend side
-			if(events.count > 0) {
-			  System.out.println("There are " + events.count + " happened belonging to account " + account);
+			if (events.count > 0) {
+				System.out.println("There are " + events.count + " happened belonging to account " + account);
 			}
 		}
 	}

@@ -402,7 +402,6 @@ public abstract class APIResource extends KloudlessObject {
 	      int oneMb = 1024 * 1024;
 	      while(read != -1) {
 	      	bos.write(bytes, 0, read);
-		      hasRead += read;
 		      //TODO: should replace following line with listeners
 		      if(hasRead >= oneMb) {
 		      	hasRead = 0;
