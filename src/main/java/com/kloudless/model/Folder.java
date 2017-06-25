@@ -1,24 +1,24 @@
 package com.kloudless.model;
 
-import java.util.Map;
-
 import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
 import com.kloudless.net.KloudlessResponse;
 
+import java.util.Map;
+
 public class Folder extends Metadata {
 
 	/**
 	 * Makes a Kloudless API request that returns the contents of a specific folder.  A MetadataCollection is
 	 * returned containing a list of objects of files and folders.
-	 * 
-	 * @param id - identifier of folder
+	 *
+	 * @param id        - identifier of folder
 	 * @param accountId
-	 * @param params - The parameters can include:
-	 * 		- page_number
-	 * 		- page_size
+	 * @param params    - The parameters can include:
+	 *                  - page_number
+	 *                  - page_size
 	 * @return MetadataCollection
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -26,7 +26,7 @@ public class Folder extends Metadata {
 	 * @throws APIConnectionException
 	 */
 	public static MetadataCollection contents(String id, String accountId,
-			Map<String, Object> params) throws APIException,
+																						Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String.format("%s/%s",
@@ -44,8 +44,8 @@ public class Folder extends Metadata {
 
 	/**
 	 * Makes a Kloudless API request to retrieve folder metadata for a specific folder
-	 * 
-	 * @param id - folder identifier
+	 *
+	 * @param id        - folder identifier
 	 * @param accountId
 	 * @param params
 	 * @return Folder
@@ -55,7 +55,7 @@ public class Folder extends Metadata {
 	 * @throws APIConnectionException
 	 */
 	public static Folder retrieve(String id, String accountId,
-			Map<String, Object> params) throws APIException,
+																Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String.format("%s/%s",
@@ -67,12 +67,12 @@ public class Folder extends Metadata {
 	/**
 	 * Makes a Kloudless API request to rename or move the folder. Since this is a patch request, the parameters are
 	 * moved to the request body.
-	 * 
+	 *
 	 * @param id
 	 * @param accountId
-	 * @param params - The parameters include:
-	 * 		- parent_id
-	 * 		- name
+	 * @param params    - The parameters include:
+	 *                  - parent_id
+	 *                  - name
 	 * @return Folder
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -80,7 +80,7 @@ public class Folder extends Metadata {
 	 * @throws APIConnectionException
 	 */
 	public static Folder save(String id, String accountId,
-			Map<String, Object> params) throws APIException,
+														Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String.format("%s/%s",
@@ -91,12 +91,12 @@ public class Folder extends Metadata {
 
 	/**
 	 * Makes a Kloudless API request to create a folder. Parameters are placed into the body
-	 * 
+	 *
 	 * @param accountId
-	 * @param params - The parameters include:
-	 * 		- parent_id
-	 * 		- name
-	 * 		- conflict_if_exists - if true, an existing folder with the same name will result in an error
+	 * @param params    - The parameters include:
+	 *                  - parent_id
+	 *                  - name
+	 *                  - conflict_if_exists - if true, an existing folder with the same name will result in an error
 	 * @return Folder
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -121,8 +121,8 @@ public class Folder extends Metadata {
 	/**
 	 * Makes a Kloudless API request to delete a folder.  The KloudlessResponse returns true or false for whether
 	 * a delete was successful or not.
-	 * 
-	 * @param id - folder identifier
+	 *
+	 * @param id        - folder identifier
 	 * @param accountId
 	 * @param params
 	 * @return KloudlessResponse
@@ -132,7 +132,7 @@ public class Folder extends Metadata {
 	 * @throws APIConnectionException
 	 */
 	public static KloudlessResponse delete(String id, String accountId,
-			Map<String, Object> params) throws APIException,
+																				 Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String.format("%s/%s",

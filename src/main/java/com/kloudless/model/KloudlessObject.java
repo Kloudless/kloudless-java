@@ -1,10 +1,10 @@
 package com.kloudless.model;
 
-import java.lang.reflect.Field;
-
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import java.lang.reflect.Field;
 
 public abstract class KloudlessObject {
 
@@ -17,7 +17,7 @@ public abstract class KloudlessObject {
 	@Override
 	public String toString() {
 		return String.format("<%s@%s id=%s> JSON: %s", this.getClass()
-				.getName(), System.identityHashCode(this), this.getIdString(),
+						.getName(), System.identityHashCode(this), this.getIdString(),
 				PRETTY_PRINT_GSON.toJson(this));
 	}
 

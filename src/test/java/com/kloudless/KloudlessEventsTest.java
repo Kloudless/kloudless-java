@@ -23,10 +23,10 @@ public class KloudlessEventsTest {
 	static List<String> accounts = new ArrayList<>();
 	HashMap<String, Object> params = new HashMap<>();
 	HashMap<String, Object> metadata = new HashMap<>();
-	
+
 	@BeforeClass
 	public static void setUp() {
-	  Kloudless.overrideApiBase(TestInfo.getApiBasedUrl());
+		Kloudless.overrideApiBase(TestInfo.getApiBasedUrl());
 		Kloudless.apiKey = TestInfo.getApiKey();
 		accounts = TestInfo.getTestAccounts();
 	}
@@ -53,13 +53,13 @@ public class KloudlessEventsTest {
 			assertThat(nestedFolder.id).isNotEmpty();
 			assertThat(nestedFolder.parent.Id).isEqualTo(createdFolder.id);
 			assertThat(nestedFolder.name).isEqualTo("create nested folder event");
-			
+
 			// Rename Nested Folder
 			params.clear();
 			params.put("name", "rename nested folder event");
 			Folder renamedNestedFolder = Folder.save(nestedFolder.id, account, params);
 			assertThat(renamedNestedFolder.name).isEqualTo("rename nested folder event");
-			
+
 			// Delete Nested Folder
 			params.clear();
 			KloudlessResponse resp = Folder.delete(renamedNestedFolder.id, account, null);
@@ -75,7 +75,7 @@ public class KloudlessEventsTest {
 			File createdFile = File.create(account, params);
 			assertThat(createdFile.id).isNotEmpty();
 			assertThat(createdFile.name).isEqualTo("create_file_event.txt");
-			
+
 			// Update File
 			params.clear();
 			params.put("body", "Hello, World! Hello, World!".getBytes());
@@ -100,19 +100,19 @@ public class KloudlessEventsTest {
 			File copyNestedFile = File.copy(nestedFile.id, account, params);
 			assertThat(copyNestedFile.parent.Id).isEqualTo(createdFolder.id);
 			assertThat(copyNestedFile.id).isNotEqualTo(nestedFile.id);
-			
+
 			// Move Copied Nested File
 			params.clear();
 			params.put("parent_id", "root");
 			File movedCopiedNestedFile = File.save(copyNestedFile.id, account, params);
 			assertThat(movedCopiedNestedFile.parent.Id).isEqualTo("root");
-			
+
 			// Rename Nested File
 			params.clear();
 			params.put("name", "rename_nested_file.txt");
 			File renamedNestedFile = File.save(nestedFile.id, account, params);
 			assertThat(renamedNestedFile.name).isEqualTo("rename_nested_file.txt");
-			
+
 			// Delete Nested File
 			params.clear();
 			resp = File.delete(renamedNestedFile.id, account, null);
@@ -125,13 +125,13 @@ public class KloudlessEventsTest {
 	public void testAccountRecent() throws KloudlessException {
 		for (String account : accounts) {
 			FileCollection results = Account.recent(account, null);
-			if(results.count > 0) {
-        System.out.println("There are " + results.count + " files or folders" +
-            " belonging to account " + account + " recently changed!");
-        assertThat(results.total).isEqualTo(results.objects.size());
-        results.objects.stream().forEach(x -> {
-          assertThat(x.account).isEqualTo(Long.valueOf(account));
-        });
+			if (results.count > 0) {
+				System.out.println("There are " + results.count + " files or folders" +
+						" belonging to account " + account + " recently changed!");
+				assertThat(results.total).isEqualTo(results.objects.size());
+				results.objects.stream().forEach(x -> {
+					assertThat(x.account).isEqualTo(Long.valueOf(account));
+				});
 			}
 		}
 	}
@@ -140,11 +140,11 @@ public class KloudlessEventsTest {
 	@Test
 	public void testEventsRetrieval() throws KloudlessException {
 		for (String account : accounts) {
-		  params.clear();
+			params.clear();
 			EventCollection events = Account.events(account, params);
 			//TODO: will test later if getting better understanding of event on backend side
-			if(events.count > 0) {
-			  System.out.println("There are " + events.count + " happened belonging to account " + account);
+			if (events.count > 0) {
+				System.out.println("There are " + events.count + " happened belonging to account " + account);
 			}
 		}
 	}
