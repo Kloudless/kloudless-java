@@ -259,7 +259,6 @@ public class KloudlessTest extends KloudlessBaseTest {
 	public void testFileDelete() throws KloudlessException, IOException {
 		final String fileName = "test file deletion";
 		java.io.File file1 = new java.io.File(TestInfo.getPathUploadingFile());
-		final long size = file1.length();
 		for (String account : testAccounts) {
 			File fileCreated = createTestFile(fileName, file1, getRootFolderId(account),
 					account);
@@ -337,7 +336,6 @@ public class KloudlessTest extends KloudlessBaseTest {
 		for (String account : testAccounts) {
 			params.clear();
 			keys.clear();
-			;
 			params.put("name", file.getName());
 			params.put("parent_id", getRootFolderId(account));
 			params.put("size", file.length());
