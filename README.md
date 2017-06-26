@@ -14,7 +14,7 @@ Installation
 
 You'll need to manually install the following JARs:
 
-* [The Kloudless SDK JAR from S3 with dependencies included](https://s3-us-west-2.amazonaws.com/kloudless-static-assets/p/platform/sdk/kloudless-java-0.1.6.jar)
+* [The Kloudless SDK JAR from S3 with dependencies included](https://s3-us-west-2.amazonaws.com/kloudless-static-assets/p/platform/sdk/kloudless-java-1.0.1.jar)
 
 Usage
 =====
