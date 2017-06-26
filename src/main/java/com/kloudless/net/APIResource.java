@@ -31,14 +31,6 @@ public abstract class APIResource extends KloudlessObject {
 			.registerTypeAdapter(Data.class, new DataDeserializer())
 			.registerTypeAdapter(KloudlessRawJsonObject.class,
 					new KloudlessRawJsonObjectDeserializer()).create();
-	public static final String CHARSET = "UTF-8";
-	private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
-	/*
-	 * Set this property to override your environment's default
-	 * URLStreamHandler; Settings the property should not be needed in most
-	 * environments.
-	 */
-	private static final String CUSTOM_URL_STREAM_HANDLER_PROPERTY_NAME = "com.kloudless.net.customURLStreamHandler";
 
 	protected static String className(Class<?> clazz) {
 		String className = clazz.getSimpleName().toLowerCase()
@@ -92,6 +84,21 @@ public abstract class APIResource extends KloudlessObject {
 		}
 	}
 
+	public static final String CHARSET = "UTF-8";
+
+	private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
+
+	/*
+	 * Set this property to override your environment's default
+	 * URLStreamHandler; Settings the property should not be needed in most
+	 * environments.
+	 */
+	private static final String CUSTOM_URL_STREAM_HANDLER_PROPERTY_NAME = "com.kloudless.net.customURLStreamHandler";
+
+	protected enum RequestMethod {
+		GET, PATCH, POST, PUT, DELETE
+	}
+
 	private static String urlEncode(String str)
 			throws UnsupportedEncodingException {
 		// Preserve original behavior that passing null for an object id will
@@ -127,7 +134,7 @@ public abstract class APIResource extends KloudlessObject {
 			keys.put("bearerToken", Kloudless.bearerToken);
 		}
 
-		String appUrl = String.format("%s/v%s/%s",
+		String appUrl = String.format("%s/v%s/%s", 
 				Kloudless.getApiBase(),
 				Kloudless.apiVersion,
 				Kloudless.APPLICATIONS);
@@ -137,19 +144,20 @@ public abstract class APIResource extends KloudlessObject {
 				headers.put("Authorization",
 						String.format("DeveloperKey %s", keys.get("developerKey")));
 			}
-		} else {
+		}
+		else {
 			if (keys.get("apiKey") != null) {
 				headers.put("Authorization", String.format("ApiKey %s", keys.get("apiKey")));
 			} else if (Kloudless.bearerToken != null) {
 				headers.put("Authorization",
-						String.format("Bearer %s", Kloudless.bearerToken));
+							String.format("Bearer %s", Kloudless.bearerToken));
 			}
 		}
 
 		// debug headers
-		String[] propertyNames = {"os.name", "os.version", "os.arch",
+		String[] propertyNames = { "os.name", "os.version", "os.arch",
 				"java.version", "java.vendor", "java.vm.version",
-				"java.vm.vendor"};
+				"java.vm.vendor" };
 		Map<String, String> propertyMap = new HashMap<String, String>();
 		for (String propertyName : propertyNames) {
 			propertyMap.put(propertyName, System.getProperty(propertyName));
@@ -229,26 +237,26 @@ public abstract class APIResource extends KloudlessObject {
 	}
 
 	private static void allowPatchCommand(java.net.HttpURLConnection conn) {
-		Object target = null;
-		try {
-			if (conn instanceof HttpsURLConnectionImpl) {
-				final Field delegate = HttpsURLConnectionImpl.class.getDeclaredField("delegate");
-				delegate.setAccessible(true);
-				target = delegate.get(conn);
-			} else {
-				target = conn;
-			}
+    Object target = null;
+    try {
+		  if(conn instanceof HttpsURLConnectionImpl) {
+		    final Field delegate = HttpsURLConnectionImpl.class.getDeclaredField("delegate");
+		    delegate.setAccessible(true);
+		    target = delegate.get(conn);
+      } else {
+		    target = conn;
+      }
 
-			final Field f = HttpURLConnection.class.getDeclaredField("methods");
-			f.setAccessible(true);
-			int last = 6; // index 6 is TRACE
-			//TODO: temp solution to replace trace with patch
-			((String[]) f.get(target))[last] = "PATCH";
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			//TODO: log
-			e.printStackTrace();
-		}
-	}
+      final Field f = HttpURLConnection.class.getDeclaredField("methods");
+		  f.setAccessible(true);
+		  int last = 6; // index 6 is TRACE
+		  //TODO: temp solution to replace trace with patch
+      ((String[])f.get(target))[last] = "PATCH";
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      //TODO: log
+      e.printStackTrace();
+    }
+  }
 
 	private static java.net.HttpURLConnection createPatchConnection(
 			String url, Map<String, Object> params, String query, Map<String, String> keys)
@@ -270,7 +278,7 @@ public abstract class APIResource extends KloudlessObject {
 		}
 		return conn;
 	}
-
+	
 	private static java.net.HttpURLConnection createPutConnection(
 			String url, Map<String, Object> params, String query, Map<String, String> keys)
 			throws IOException {
@@ -281,14 +289,14 @@ public abstract class APIResource extends KloudlessObject {
 		OutputStream output = null;
 		// put in body the data for a PUT
 		try {
-			if (params.containsKey("file")) {
+			if(params.containsKey("file")) {
 				java.io.File file = (File) params.get("file");
-				final int partNum = (int) params.get("part_number");
-				final long partSize = (long) params.get("part_size");
+				final int partNum = (int)params.get("part_number");
+				final long partSize = (long)params.get("part_size");
 				long endPosition = partNum * partSize;
 				long startPos = 0;
 				int readSize = 8192;
-				if (endPosition > file.length()) {
+				if(endPosition > file.length()) {
 					startPos = endPosition - partSize;
 					endPosition = file.length();
 				} else {
@@ -300,8 +308,8 @@ public abstract class APIResource extends KloudlessObject {
 				conn.setRequestProperty("Content-Length", String.valueOf(contentLength));
 				conn.setFixedLengthStreamingMode(contentLength);
 
-				try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-						 BufferedOutputStream bos = new BufferedOutputStream(conn.getOutputStream())) {
+				try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+				    BufferedOutputStream bos = new BufferedOutputStream(conn.getOutputStream())) {
 
 					long skip = 0;
 
@@ -315,12 +323,12 @@ public abstract class APIResource extends KloudlessObject {
 
 					int read = bis.read(bytes, 0, readSize);
 					int bytesSent = 0;
-					while (read > 0 && bytesSent < contentLength) {
+					while(read > 0 && bytesSent < contentLength) {
 						bos.write(bytes, 0, read);
 						bytesSent += read;
-						if ((contentLength - bytesSent) < readSize) {
-							readSize = (int) (contentLength - bytesSent);
-							if (readSize > 0) {
+						if((contentLength - bytesSent) < readSize) {
+							readSize = (int)(contentLength - bytesSent);
+							if(readSize > 0) {
 								read = bis.read(bytes, 0, readSize);
 								bos.write(bytes, 0, read);
 							}
@@ -329,11 +337,11 @@ public abstract class APIResource extends KloudlessObject {
 							read = bis.read(bytes, 0, readSize);
 						}
 					}
-					if (read > 0) {
+					if(read > 0) {
 						bos.write(bytes, 0, read);
 					}
 					bos.flush();
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					throw ex;
 				}
 			} else if (params.containsKey("body")) {
@@ -344,8 +352,8 @@ public abstract class APIResource extends KloudlessObject {
 						"application/json");
 				output = conn.getOutputStream();
 				output.write(GSON.toJson(params).getBytes());
-			}
-		} catch (IOException ex) {
+			}			
+		} catch(IOException ex) {
 			throw ex;
 		} finally {
 			if (output != null) {
@@ -353,7 +361,7 @@ public abstract class APIResource extends KloudlessObject {
 			}
 		}
 		return conn;
-	}
+	}	
 
 	private static java.net.HttpURLConnection createPostConnection(
 			String url, Map<String, Object> params, String query, Map<String, String> keys)
@@ -368,58 +376,58 @@ public abstract class APIResource extends KloudlessObject {
 
 		BufferedInputStream bis = null;
 		BufferedOutputStream bos = null;
-		try {
-			if (params.containsKey("file")) {
-				conn.setRequestProperty("X-Kloudless-Metadata", (String) params.get("metadata"));
-				conn.setRequestProperty("Content-Type", "application/octet-stream");
-				// get file path
-				File file = (java.io.File) params.get("file");
-				bis = new BufferedInputStream(new FileInputStream(file));
-				long fileSize = file.length();
-				conn.setRequestProperty("Content-Length", String.valueOf(fileSize));
-				conn.setFixedLengthStreamingMode(fileSize);
+    try {
+      if (params.containsKey("file")) {
+        conn.setRequestProperty("X-Kloudless-Metadata", (String) params.get("metadata"));
+        conn.setRequestProperty("Content-Type", "application/octet-stream");
+        // get file path
+        File file = (java.io.File)params.get("file");
+        bis = new BufferedInputStream(new FileInputStream(file));
+	      long fileSize = file.length();
+        conn.setRequestProperty("Content-Length", String.valueOf(fileSize));
+	      conn.setFixedLengthStreamingMode(fileSize);
 
-				bos = new BufferedOutputStream(conn.getOutputStream());
+        bos = new BufferedOutputStream(conn.getOutputStream());
 
-				int readSize = 8192;
-				byte[] bytes = null;
-				if (fileSize < readSize) {
-					readSize = (int) fileSize;
-				}
+	      int readSize = 8192;
+	      byte[] bytes = null;
+	      if(fileSize < readSize) {
+		      readSize = (int) fileSize;
+	      }
 
-				bytes = new byte[readSize];
-				int read = bis.read(bytes, 0, readSize);
-				int hasRead = read;
-				int mb = 0;
-				int oneMb = 1024 * 1024;
-				while (read != -1) {
-					bos.write(bytes, 0, read);
-					hasRead += read;
-					//TODO: should replace following line with listeners
-					if (hasRead >= oneMb) {
-						hasRead = 0;
-						mb += 1;
-						System.out.println(mb + " mb sent!");
-					}
-					read = bis.read(bytes, 0, readSize);
-				}
-			} else {
-				conn.setRequestProperty("Content-Type", String
-						.format("application/json;charset=%s",
-								CHARSET));
-				bos = new BufferedOutputStream(conn.getOutputStream());
-				String json = GSON.toJson(params);
-				bos.write(json.getBytes());
-			}
-		} finally {
-			if (bos != null) {
-				bos.flush();
-				bos.close();
-			}
-			if (bis != null) {
-				bis.close();
-			}
-		}
+	      bytes = new byte[readSize];
+	      int read = bis.read(bytes, 0, readSize);
+	      int hasRead = read;
+	      int mb = 0;
+	      int oneMb = 1024 * 1024;
+	      while(read != -1) {
+	      	bos.write(bytes, 0, read);
+		      hasRead += read;
+		      //TODO: should replace following line with listeners
+		      if(hasRead >= oneMb) {
+		      	hasRead = 0;
+		      	mb += 1;
+		      	System.out.println(mb + " mb sent!");
+		      }
+		      read = bis.read(bytes, 0, readSize);
+	      }
+      } else {
+        conn.setRequestProperty("Content-Type", String
+            .format("application/json;charset=%s",
+                CHARSET));
+        bos = new BufferedOutputStream(conn.getOutputStream());
+        String json = GSON.toJson(params);
+        bos.write(json.getBytes());
+      }
+    } finally {
+    	if(bos != null) {
+    		bos.flush();
+    		bos.close();
+	    }
+	    if(bis != null) {
+    		bis.close();
+	    }
+    }
 		return conn;
 	}
 
@@ -433,7 +441,7 @@ public abstract class APIResource extends KloudlessObject {
 	}
 
 	private static String createQuery(RequestMethod method,
-																		Map<String, Object> params) throws UnsupportedEncodingException,
+			Map<String, Object> params) throws UnsupportedEncodingException,
 			InvalidRequestException {
 		Map<String, String> flatParams = flattenParams(params);
 		StringBuilder queryStringBuffer = new StringBuilder();
@@ -484,6 +492,18 @@ public abstract class APIResource extends KloudlessObject {
 		return flatParams;
 	}
 
+	private static class Error {
+		@SuppressWarnings("unused")
+		String type;
+
+		String message;
+
+		@SuppressWarnings("unused")
+		String code;
+
+		String param;
+	}
+
 	private static String getResponseBody(InputStream responseStream, ByteArrayOutputStream byteArrayOut)
 			throws IOException {
 		// \A is the beginning of
@@ -496,7 +516,7 @@ public abstract class APIResource extends KloudlessObject {
 		while ((c = bufferedInputStream.read()) != -1) {
 			byteArrayOut.write(c);
 		}
-
+		
 		String rBody = byteArrayOut.toString(CHARSET);
 		responseStream.close();
 
@@ -511,35 +531,35 @@ public abstract class APIResource extends KloudlessObject {
 
 		try {
 			switch (method) {
-				case GET:
-					conn = createGetConnection(url, query, keys);
-					break;
-				case PATCH:
-					conn = createPatchConnection(url, params, query, keys);
-					break;
-				case PUT:
-					conn = createPutConnection(url, params, query, keys);
-					break;
-				case POST:
-					conn = createPostConnection(url, params, query, keys);
-					break;
-				case DELETE:
-					conn = createDeleteConnection(url, query, keys);
-					break;
-				default:
-					throw new APIConnectionException(
-							String.format(
-									"Unrecognized HTTP method %s. "
-											+ "This indicates a bug in the Kloudless bindings. Please contact "
-											+ "support@kloudless.com for assistance.",
-									method));
+			case GET:
+				conn = createGetConnection(url, query, keys);
+				break;
+			case PATCH:
+				conn = createPatchConnection(url, params, query, keys);
+				break;
+			case PUT:
+				conn = createPutConnection(url, params, query, keys);
+				break;
+			case POST:
+				conn = createPostConnection(url, params, query, keys);
+				break;
+			case DELETE:
+				conn = createDeleteConnection(url, query, keys);
+				break;
+			default:
+				throw new APIConnectionException(
+						String.format(
+								"Unrecognized HTTP method %s. "
+										+ "This indicates a bug in the Kloudless bindings. Please contact "
+										+ "support@kloudless.com for assistance.",
+								method));
 			}
 			// trigger the request
 			int rCode = conn.getResponseCode();
 			String rBody = null;
 			Map<String, List<String>> headers;
 			ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
-
+			
 			// convert responseBody and save responseStream
 			if (rCode >= 200 && rCode < 300) {
 				rBody = getResponseBody(conn.getInputStream(), byteArrayOut);
@@ -588,7 +608,7 @@ public abstract class APIResource extends KloudlessObject {
 		try {
 			return _request(method, path, params, keys);
 		} finally {
-			if (allowedToSetTTL) {
+ 			if (allowedToSetTTL) {
 				if (originalDNSCacheTTL == null) {
 					// value unspecified by implementation
 					// DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
@@ -607,19 +627,19 @@ public abstract class APIResource extends KloudlessObject {
 			Map<String, Object> params, Map<String, String> keys) //Map<String, String> keys to have the .length() method
 			throws AuthenticationException, InvalidRequestException,
 			APIConnectionException, APIException {
-
+		
 		if (keys == null) {
 			keys = new HashMap<String, String>();
 		}
-
+		
 		if ((Kloudless.apiKey == null || Kloudless.apiKey.length() == 0)
-				&& (keys.get("apiKey") == null || keys.get("apiKey").length() == 0)
+				&& (keys.get("apiKey") == null || keys.get("apiKey").length() == 0) 
 				&& (Kloudless.developerKey == null || Kloudless.developerKey
-				.length() == 0)
+						.length() == 0)
 				&& (keys.get("developerKey") == null || keys.get("developerKey")
-				.length() == 0)
+						.length() == 0)
 				&& (keys.get("bearerToken") == null || keys.get("bearerToken")
-				.length() == 0)) {
+						.length() == 0)) {
 			throw new AuthenticationException(
 					"No API Key, Developer Key or Bearer Token provided. (HINT: set your API key using 'Kloudless.apiKey = <API-KEY>'"
 							+ " or 'Kloudless.developerKey = <DEV-KEY>'"
@@ -627,15 +647,17 @@ public abstract class APIResource extends KloudlessObject {
 							+ "You can generate API keys from the Kloudless web interface. "
 							+ "See https://developers.kloudless.com/docs for details or email support@kloudless.com if you have questions.");
 		}
-
+		
 		if (Kloudless.apiKey != null) {
 			keys.put("apiKey", Kloudless.apiKey);
-		} else if (Kloudless.developerKey != null) {
+		}		
+		else if (Kloudless.developerKey != null) {
 			keys.put("developerKey", Kloudless.developerKey);
-		} else if (Kloudless.bearerToken != null) {
+		}
+		else if (Kloudless.bearerToken != null) {
 			keys.put("bearerToken", Kloudless.bearerToken);
 		}
-
+		
 		String query;
 		String url = String.format("%s/v%s/%s", Kloudless.getApiBase(),
 				Kloudless.apiVersion, path);
@@ -682,16 +704,16 @@ public abstract class APIResource extends KloudlessObject {
 		}
 
 		switch (rCode) {
-			case 400:
-				throw new InvalidRequestException(error.message, error.param, null);
-			case 404:
-				throw new InvalidRequestException(error.message, error.param, null);
-			case 403:
-				throw new AuthenticationException(error.message);
-			case 401:
-				throw new AuthenticationException(error.message);
-			default:
-				throw new APIException(error.message, null);
+		case 400:
+			throw new InvalidRequestException(error.message, error.param, null);
+		case 404:
+			throw new InvalidRequestException(error.message, error.param, null);
+		case 403:
+			throw new AuthenticationException(error.message);
+		case 401:
+			throw new AuthenticationException(error.message);
+		default:
+			throw new APIException(error.message, null);
 		}
 	}
 
@@ -700,7 +722,7 @@ public abstract class APIResource extends KloudlessObject {
 	 * maintain AppEngine-specific JAR
 	 */
 	private static KloudlessResponse makeAppEngineRequest(RequestMethod method,
-																												Map<String, Object> params, String url, String query, Map<String, String> keys)
+			Map<String, Object> params, String url, String query, Map<String, String> keys)
 			throws APIException {
 		String unknownErrorMessage = "Sorry, an unknown error occurred while trying to use the "
 				+ "Google App Engine runtime. Please contact support@kloudless.com for assistance.";
@@ -797,18 +819,18 @@ public abstract class APIResource extends KloudlessObject {
 			Map<String, List<String>> headers = new HashMap<String, List<String>>();
 
 			int responseCode = (Integer) response.getClass()
-					.getDeclaredMethod("getResponseCode").invoke(response);
+			        .getDeclaredMethod("getResponseCode").invoke(response);
 
 			String body = "";
 			byte[] responseBytes = (byte[]) response.getClass()
-					.getDeclaredMethod("getContent").invoke(response);
+			        .getDeclaredMethod("getContent").invoke(response);
 			ByteArrayOutputStream responseStream = new ByteArrayOutputStream(0);
 			if (responseBytes != null) {
 				body = new String(responseBytes, CHARSET);
-				responseStream = new ByteArrayOutputStream(responseBytes.length);
-				responseStream.write(responseBytes, 0, responseBytes.length);
+			    responseStream = new ByteArrayOutputStream(responseBytes.length);
+			    responseStream.write(responseBytes, 0, responseBytes.length);
 			}
-
+			
 			return new KloudlessResponse(responseCode, body, headers, responseStream);
 		} catch (InvocationTargetException e) {
 			throw new APIException(unknownErrorMessage, e);
@@ -831,22 +853,6 @@ public abstract class APIResource extends KloudlessObject {
 		} catch (UnsupportedEncodingException e) {
 			throw new APIException(unknownErrorMessage, e);
 		}
-	}
-
-	protected enum RequestMethod {
-		GET, PATCH, POST, PUT, DELETE
-	}
-
-	private static class Error {
-		@SuppressWarnings("unused")
-		String type;
-
-		String message;
-
-		@SuppressWarnings("unused")
-		String code;
-
-		String param;
 	}
 
 }

@@ -9,7 +9,7 @@ public class KloudlessResponse {
 	String responseBody;
 	Map<String, List<String>> responseHeaders;
 	ByteArrayOutputStream responseStream;
-
+	
 	public KloudlessResponse(int responseCode, String responseBody) {
 		this.responseCode = responseCode;
 		this.responseBody = responseBody;
@@ -17,20 +17,20 @@ public class KloudlessResponse {
 	}
 
 	public KloudlessResponse(int responseCode, String responseBody,
-													 Map<String, List<String>> responseHeaders) {
+			Map<String, List<String>> responseHeaders) {
 		this.responseCode = responseCode;
 		this.responseBody = responseBody;
 		this.responseHeaders = responseHeaders;
 	}
 
 	public KloudlessResponse(int responseCode, String responseBody,
-													 Map<String, List<String>> responseHeaders, ByteArrayOutputStream responseStream) {
+			Map<String, List<String>> responseHeaders, ByteArrayOutputStream responseStream) {
 		this.responseCode = responseCode;
 		this.responseBody = responseBody;
 		this.responseHeaders = responseHeaders;
 		this.responseStream = responseStream;
 	}
-
+	
 	public int getResponseCode() {
 		return responseCode;
 	}
@@ -46,16 +46,16 @@ public class KloudlessResponse {
 	public void setResponseBody(String responseBody) {
 		this.responseBody = responseBody;
 	}
-
+	
 	public Map<String, List<String>> getResponseHeaders() {
 		return responseHeaders;
 	}
-
+	
 	public ByteArrayOutputStream getResponseStream() {
 		return responseStream;
 	}
-
+	
 	public void setResponseStream(ByteArrayOutputStream responseStream) {
-		this.responseStream = responseStream;
+		this.responseStream = responseStream; 
 	}
 }

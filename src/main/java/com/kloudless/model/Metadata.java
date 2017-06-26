@@ -1,8 +1,8 @@
 package com.kloudless.model;
 
-import com.kloudless.net.APIResourceMixin;
-
 import java.util.List;
+
+import com.kloudless.net.APIResourceMixin;
 
 public class Metadata extends APIResourceMixin {
 	public Long account;

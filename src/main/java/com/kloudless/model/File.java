@@ -1,5 +1,6 @@
 package com.kloudless.model;
 
+import com.google.gson.annotations.SerializedName;
 import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
@@ -14,10 +15,10 @@ public class File extends Metadata {
 	/**
 	 * Makes a Kloudless API Request to retrieve the File contents given a file identifier.  The KloudlessResponse
 	 * contains a string responseBody and stream responseStream format.
-	 *
-	 * @param id        - file identifier
+	 * 
+	 * @param id - file identifier
 	 * @param accountId - account identifier
-	 * @param params    - no query parameters for downloading a file
+	 * @param params - no query parameters for downloading a file
 	 * @return KloudlessResponse
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -25,7 +26,7 @@ public class File extends Metadata {
 	 * @throws APIConnectionException
 	 */
 	public static KloudlessResponse contents(String id, String accountId,
-																					 Map<String, Object> params) throws APIException,
+			Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String.format("%s/%s",
@@ -38,10 +39,10 @@ public class File extends Metadata {
 
 	/**
 	 * Makes a Kloudless API request to retrieve file metadata information.
-	 *
-	 * @param id        - file identifier
+	 * 
+	 * @param id - file identifier
 	 * @param accountId - account identifier
-	 * @param params    - no query parameters for retrieving file metadata
+	 * @param params - no query parameters for retrieving file metadata
 	 * @return File
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -49,7 +50,7 @@ public class File extends Metadata {
 	 * @throws APIConnectionException
 	 */
 	public static File retrieve(String id, String accountId,
-															Map<String, Object> params) throws APIException,
+			Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String.format("%s/%s",
@@ -61,13 +62,13 @@ public class File extends Metadata {
 	/**
 	 * Makes a Kloudless API request to rename or move a file. Since this is a patch request, the parameters are
 	 * moved to the request body.
-	 *
+	 * 
 	 * @param id
 	 * @param accountId
-	 * @param params    - The optional parameters include:
-	 *                  - parent_id
-	 *                  - name
-	 *                  - account
+	 * @param params - The optional parameters include:
+	 * 		- parent_id
+	 * 		- name
+	 * 		- account
 	 * @return
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -75,7 +76,7 @@ public class File extends Metadata {
 	 * @throws APIConnectionException
 	 */
 	public static File save(String id, String accountId,
-													Map<String, Object> params) throws APIException,
+			Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String.format("%s/%s",
@@ -87,14 +88,14 @@ public class File extends Metadata {
 	/**
 	 * Makes a Kloudless API request to upload a file.  Since file uploads are performed as a multipart/form
 	 * data request, the parameters are placed into the body.
-	 *
+	 * 
 	 * @param accountId
-	 * @param params    - The parameters include:
-	 *                  - file - byte array of file
-	 *                  - metadata - this is a JSON string of metadata information including
-	 *                  - parent_id - identifier of where the file needs to be placed
-	 *                  - name - name of the file
-	 *                  - overwrite - option true/false of whether you want the file to be overwritten
+	 * @param params - The parameters include:
+	 * 		- file - byte array of file
+	 * 		- metadata - this is a JSON string of metadata information including
+	 * 			- parent_id - identifier of where the file needs to be placed
+	 * 			- name - name of the file
+	 * 		- overwrite - option true/false of whether you want the file to be overwritten
 	 * @return File
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -113,18 +114,18 @@ public class File extends Metadata {
 			Object overwrite = params.remove("overwrite");
 			path += "?" + overwrite.toString();
 		}
-
+		
 		return create(path, params, File.class, null);
 	}
 
 	/**
 	 * Makes a Kloudless API request to update contents of a file.  The contents
 	 * are placed in the body
-	 *
+	 * 
 	 * @param id
 	 * @param accountId
-	 * @param params    - The parameters include:
-	 *                  - body - byte array of file
+	 * @param params - The parameters include:
+	 * 		- body - byte array of file
 	 * @return File
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -140,11 +141,11 @@ public class File extends Metadata {
 				instanceURL(File.class, id));
 		return update(path, params, File.class, null);
 	}
-
+	
 	/**
 	 * Makes a Kloudless API request to delete a file. Returns a success or false within the
 	 * KloudlessResponse object.
-	 *
+	 * 
 	 * @param id
 	 * @param accountId
 	 * @param params
@@ -155,7 +156,7 @@ public class File extends Metadata {
 	 * @throws APIConnectionException
 	 */
 	public static KloudlessResponse delete(String id, String accountId,
-																				 Map<String, Object> params) throws APIException,
+			Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String.format("%s/%s",
@@ -166,8 +167,8 @@ public class File extends Metadata {
 
 	/**
 	 * Makes a Kloudless API request to copy a file.
-	 *
-	 * @param id     - the account id or comma separated account ids.
+	 * 
+	 * @param id - the account id or comma separated account ids.
 	 * @param params - query parameters
 	 * @return MetadataCollection
 	 * @throws APIException
@@ -197,11 +198,11 @@ public class File extends Metadata {
 	 *
 	 * @param accountId the account id
 	 * @param params    the parameters include
-	 *                  - name        The name of the file to upload
-	 *                  - parent_id   The ID of the parent folder to upload the file to
-	 *                  - size        The total size of the file being uploaded
+	 *    - name        The name of the file to upload
+	 *    - parent_id   The ID of the parent folder to upload the file to
+	 *    - size        The total size of the file being uploaded
 	 * @param keys      query parameters
-	 *                  - overwrite   overwrite a existing file
+	 *    - overwrite   overwrite a existing file
 	 * @return {@code File.Multipart}
 	 * @throws InvalidRequestException
 	 * @throws APIException
@@ -209,14 +210,14 @@ public class File extends Metadata {
 	 * @throws AuthenticationException
 	 */
 	public static File.Multipart initializeMultipartUpload(String accountId,
-																												 Map<String, Object> params, Map<String, String> keys)
+	    Map<String, Object> params, Map<String, String> keys)
 			throws InvalidRequestException, APIException, APIConnectionException,
-			AuthenticationException {
+			    AuthenticationException {
 
 		String path = String.format("%s/storage/multipart",
 				instanceURL(Account.class, String.valueOf(accountId)));
 
-		if (keys.containsKey("overwrite")) {
+		if(keys.containsKey("overwrite")) {
 			path += "?overwrite";
 		}
 
@@ -229,14 +230,14 @@ public class File extends Metadata {
 	/**
 	 * Make a Kloudless API request to upload parts of a file
 	 *
-	 * @param accountId the account id
-	 * @param params    the parameters include
-	 *                  - session_id   the session id of the multipart upload
-	 *                  - file         {@link java.io.File} to be uploaded
-	 *                  - part_size    the size of each part
-	 *                  - part_number  the part will be uploaded
-	 * @param keys      the keys include
-	 *                  - part_number  the part will be uploaded
+	 * @param accountId   the account id
+	 * @param params      the parameters include
+	 *     - session_id   the session id of the multipart upload
+	 *     - file         {@link java.io.File} to be uploaded
+	 *     - part_size    the size of each part
+	 *     - part_number  the part will be uploaded
+	 * @param keys        the keys include
+	 *     - part_number  the part will be uploaded
 	 * @return {@code KloudlessResponse}
 	 * @throws InvalidRequestException
 	 * @throws APIException
@@ -244,9 +245,9 @@ public class File extends Metadata {
 	 * @throws AuthenticationException
 	 */
 	public static KloudlessResponse multipartUpload(String accountId,
-																									Map<String, Object> params, Map<String, String> keys)
+	    Map<String, Object> params, Map<String, String> keys)
 			throws InvalidRequestException, APIException, APIConnectionException,
-			AuthenticationException {
+			    AuthenticationException {
 
 		String path = String.format("%s/storage/multipart/%s?part_number=%s",
 				instanceURL(Account.class, accountId), String.valueOf(params.get("session_id")),
@@ -258,9 +259,9 @@ public class File extends Metadata {
 	/**
 	 * Make a Kloudless API request to finalize the multipart upload
 	 *
-	 * @param accountId the account id
-	 * @param params    the parameters include
-	 *                  - session_id   session_id of the multipart upload
+	 * @param accountId   the account id
+	 * @param params      the parameters include
+	 *     - session_id   session_id of the multipart upload
 	 * @return {@code File}
 	 * @throws InvalidRequestException
 	 * @throws APIException
@@ -268,7 +269,7 @@ public class File extends Metadata {
 	 * @throws AuthenticationException
 	 */
 	public static File finalizeMultipartUpload(String accountId,
-																						 Map<String, Object> params)
+	    Map<String, Object> params)
 			throws InvalidRequestException, APIException, APIConnectionException,
 			AuthenticationException {
 
@@ -286,9 +287,9 @@ public class File extends Metadata {
 	/**
 	 * Make a Kloudless API request to retrieve current status of the multipart upload
 	 *
-	 * @param account the account id
-	 * @param params  the parameters include
-	 *                - sessions_id the session id of the multipart upload
+	 * @param account     the account id
+	 * @param params      the parameters include
+	 *      - sessions_id the session id of the multipart upload
 	 * @return {@code File.Multipart}
 	 * @throws InvalidRequestException
 	 * @throws APIException
@@ -296,13 +297,13 @@ public class File extends Metadata {
 	 * @throws AuthenticationException
 	 */
 	public static Multipart retrieveMultipartUploadInfo(String account,
-																											Map<String, Object> params)
+			Map<String, Object> params)
 			throws InvalidRequestException, APIException, APIConnectionException,
 			AuthenticationException {
 
 		String path = String.format("%s/storage/multipart/%s",
 				instanceURL(Account.class, account), String.valueOf(params.get("session_id")));
-		KloudlessResponse response = request(RequestMethod.GET, path, null, null);
+		KloudlessResponse response = request(RequestMethod.GET, path, null,null);
 		int rCode = response.getResponseCode();
 		String rBody = response.getResponseBody();
 		if (rCode < 200 || rCode >= 300) {
@@ -315,9 +316,9 @@ public class File extends Metadata {
 	/**
 	 * Make a Kloudless API request to abort the multipart upload session
 	 *
-	 * @param account the account id
-	 * @param params  the parameters include
-	 *                - session_id  the session id of the multipart upload
+	 * @param account     the account id
+	 * @param params      the parameters include
+	 *      - session_id  the session id of the multipart upload
 	 * @return {@code KloudlessResponse}
 	 * @throws InvalidRequestException
 	 * @throws APIException
@@ -325,12 +326,12 @@ public class File extends Metadata {
 	 * @throws AuthenticationException
 	 */
 	public static KloudlessResponse abortMultipartUpload(String account,
-																											 Map<String, Object> params)
+      Map<String, Object> params)
 			throws InvalidRequestException, APIException, APIConnectionException,
 			AuthenticationException {
 		String path = String.format("%s/storage/multipart/%s",
 				instanceURL(Account.class, account), String.valueOf(params.get("session_id")));
-		return delete(path, new Hashtable<>(), null);
+		return delete(path, new Hashtable<>(),null);
 	}
 
 
@@ -392,21 +393,16 @@ public class File extends Metadata {
 		}
 
 		/**
-		 * Sets the size of each part but the last
-		 *
-		 * @param partSize the size of a each part but the last
-		 */
-		public void setPartSize(long partSize) {
-			this.partSize = partSize;
-		}
-
-		/**
 		 * Returns a number indicating the count of parts to be uploaded
 		 *
 		 * @return a number indicating the count of parts to be uploaded
 		 */
 		public int getPartCount() {
-			return (int) Math.ceil((double) this.originalFileSize / getPartSize());
+			return (int) Math.ceil((double)this.originalFileSize / getPartSize());
+		}
+
+		void setOriginalFileSize(long originalFileSize) {
+			this.originalFileSize = originalFileSize;
 		}
 
 		/**
@@ -418,9 +414,15 @@ public class File extends Metadata {
 			return this.originalFileSize;
 		}
 
-		void setOriginalFileSize(long originalFileSize) {
-			this.originalFileSize = originalFileSize;
+		/**
+		 * Sets the size of each part but the last
+		 *
+		 * @param partSize the size of a each part but the last
+		 */
+		public void setPartSize(long partSize) {
+			this.partSize = partSize;
 		}
+
 
 		/**
 		 * Returns a boolean value determining whether the chunks can be
@@ -428,7 +430,7 @@ public class File extends Metadata {
 		 * serially.
 		 *
 		 * @return <code>true</code> if parallel uploaded is allowed. Otherwise,
-		 * chunks must be uploaded serially
+		 *         chunks must be uploaded serially
 		 */
 		public boolean isParallelUploads() {
 			return parallelUploads;

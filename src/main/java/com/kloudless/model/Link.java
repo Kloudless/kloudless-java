@@ -1,13 +1,13 @@
 package com.kloudless.model;
 
+import java.util.Map;
+
 import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
 import com.kloudless.net.APIResourceMixin;
 import com.kloudless.net.KloudlessResponse;
-
-import java.util.Map;
 
 public class Link extends APIResourceMixin {
 
@@ -42,7 +42,7 @@ public class Link extends APIResourceMixin {
 	/**
 	 * Makes a Kloudless API request to retrieve metadata of a specific link.
 	 *
-	 * @param id        - identifier of link
+	 * @param id - identifier of link
 	 * @param accountId
 	 * @param params
 	 * @return Link
@@ -52,7 +52,7 @@ public class Link extends APIResourceMixin {
 	 * @throws APIConnectionException
 	 */
 	public static Link retrieve(String id, String accountId,
-															Map<String, Object> params) throws APIException,
+			Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String
@@ -66,10 +66,10 @@ public class Link extends APIResourceMixin {
 	 *
 	 * @param id
 	 * @param accountId
-	 * @param params    - The parameters include:
-	 *                  - active
-	 *                  - expiration
-	 *                  - password
+	 * @param params - The parameters include:
+	 * 		- active
+	 * 		- expiration
+	 * 		- password
 	 * @return Link
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -77,7 +77,7 @@ public class Link extends APIResourceMixin {
 	 * @throws APIConnectionException
 	 */
 	public static Link save(String id, String accountId,
-													Map<String, Object> params) throws APIException,
+			Map<String, Object> params) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		String path = String.format("%s/%s",
@@ -90,11 +90,11 @@ public class Link extends APIResourceMixin {
 	 * Makes a Kloudless API request to create a link.
 	 *
 	 * @param accountId
-	 * @param params    - The parameters include:
-	 *                  - file_id - the file identifier to create the link from
-	 *                  - password - password
-	 *                  - expiration - ISO 8601 timestamp specifying when the link expires
-	 *                  - direct_link - specifying whether the link is a direct link or not
+	 * @param params - The parameters include:
+	 * 		- file_id - the file identifier to create the link from
+	 * 		- password - password
+	 * 		- expiration - ISO 8601 timestamp specifying when the link expires
+	 * 		- direct_link - specifying whether the link is a direct link or not
 	 * @return Link
 	 * @throws APIException
 	 * @throws AuthenticationException
@@ -112,7 +112,7 @@ public class Link extends APIResourceMixin {
 	/**
 	 * Makes a Kloudless API Request to delete a link
 	 *
-	 * @param id     - link identifier
+	 * @param id - link identifier
 	 * @param params
 	 * @return KloudlessResponse
 	 * @throws APIException

@@ -1,13 +1,13 @@
 package com.kloudless.model;
 
+import java.util.Map;
+
 import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
 import com.kloudless.net.APIResourceMixin;
 import com.kloudless.net.KloudlessResponse;
-
-import java.util.Map;
 
 public class Account extends APIResourceMixin {
 
@@ -39,8 +39,8 @@ public class Account extends APIResourceMixin {
 	/**
 	 * Makes a Kloudless API request to retrieve account metadata for a connected cloud
 	 * storage account. Use this method to retrieve a specific account.
-	 *
-	 * @param id     - the account id (ex: 42)
+	 * 
+	 * @param id - the account id (ex: 42)
 	 * @param params - query parameters that include active.
 	 * @return Account
 	 * @throws APIException
@@ -57,8 +57,8 @@ public class Account extends APIResourceMixin {
 	/**
 	 * Makes a Kloudless API request to delete an account returning a KloudlessResponse
 	 * of a successful delete.  Use this method to delete a specific account.
-	 *
-	 * @param id     - the account id (ex: 42)
+	 * 
+	 * @param id - the account id (ex: 42)
 	 * @param params - query parameters
 	 * @return KloudlessResponse
 	 * @throws APIException
@@ -71,14 +71,14 @@ public class Account extends APIResourceMixin {
 			APIConnectionException {
 		return delete(instanceURL(Account.class, id), params, null);
 	}
-
+	
 	/**
 	 * Makes a Kloudless API request to return a MetadataCollection of files/folders that match a search query.
 	 * You can search across multiple accounts with comma separated ids: 1,2,3,4.  If you are using
 	 * this in the Android SDK, you can only search across a single account associated with your account
 	 * key. Use this method to search files and folders.
-	 *
-	 * @param id     - the account id or comma separated account ids.
+	 * 
+	 * @param id - the account id or comma separated account ids.
 	 * @param params - query parameters
 	 * @return MetadataCollection
 	 * @throws APIException
@@ -106,15 +106,15 @@ public class Account extends APIResourceMixin {
 	 * can return files for multiple accounts.  If using an Account Key, the recent() method returns files
 	 * for a single account.
 	 *
-	 * @param id     account ID or comma delimited string of accounts (EX: 42 or 2,4,42
+	 * @param id account ID or comma delimited string of accounts (EX: 42 or 2,4,42
 	 * @param params - parameters include:
-	 *               - page_size
-	 *               - page
+	 * 		- page_size
+	 * 		- page
 	 * @return FileCollection of the format:
-	 * - total
-	 * - count
-	 * - page
-	 * - files
+	 * 		- total
+	 * 		- count
+	 * 		- page
+	 * 		- files
 	 * @throws APIException
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
@@ -137,12 +137,12 @@ public class Account extends APIResourceMixin {
 	/**
 	 * Makes a Kloudless API request for a list of events for this account.
 	 *
-	 * @param id     account ID or comma delimited string of accounts (EX: 42 or 2,4,42
+	 * @param id account ID or comma delimited string of accounts (EX: 42 or 2,4,42
 	 * @param params - parameters include:
-	 *               - cursor
+	 * 		- cursor
 	 * @return EventCollection of the format:
-	 * - cursor
-	 * - objects
+	 * 		- cursor
+	 * 		- objects
 	 * @throws APIException
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException

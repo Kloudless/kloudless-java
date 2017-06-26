@@ -5,10 +5,9 @@ package com.kloudless;
  */
 public final class StaticImporter {
 
-	// be mindful the order here to initialize PropertyiesHelper before TestInfoHelper
-	public static PropertiesHelper Props = PropertiesHelper.getInst();
-	public static TestInfoHelper TestInfo = TestInfoHelper.getInst();
+  // be mindful the order here to initialize PropertyiesHelper before TestInfoHelper
+  public static PropertiesHelper Props = PropertiesHelper.getInst();
+  public static TestInfoHelper TestInfo = TestInfoHelper.getInst();
 
-	private StaticImporter() {
-	}
+  private StaticImporter() {}
 }
