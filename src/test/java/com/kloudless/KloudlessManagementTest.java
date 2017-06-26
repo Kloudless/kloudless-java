@@ -1,47 +1,29 @@
 package com.kloudless;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kloudless.exception.KloudlessException;
-import com.kloudless.model.Account;
-import com.kloudless.model.AccountCollection;
-import com.kloudless.model.EventCollection;
-import com.kloudless.model.File;
-import com.kloudless.model.FileCollection;
-import com.kloudless.model.Folder;
-import com.kloudless.model.Link;
-import com.kloudless.model.LinkCollection;
-import com.kloudless.model.MetadataCollection;
-import com.kloudless.model.Permission;
 import com.kloudless.model.Application;
 import com.kloudless.model.ApplicationCollection;
-import com.kloudless.model.APIKey;
-import com.kloudless.model.APIKeyCollection;
-import com.kloudless.model.KloudlessCollection;
-import com.kloudless.net.KloudlessResponse;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class KloudlessManagementTest {
 	
 	static Gson GSON = new GsonBuilder().create();
 	static ArrayList<String> testAccounts = new ArrayList<String>();
-
+	
 	@BeforeClass
 	public static void setUp() {
 		Kloudless.developerKey = "INSERT DEVELOPER KEY HERE";
-
+		
 		// Override API Base, now works with http
 //		Kloudless.overrideApiBase("http://localhost:8002");
-
+		
 		// Insert Custom Headers
 		HashMap<String, String> customHeaders = new HashMap<String, String>();
 		Kloudless.addCustomHeaders(customHeaders);
