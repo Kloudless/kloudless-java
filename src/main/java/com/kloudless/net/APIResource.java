@@ -1,23 +1,5 @@
 package com.kloudless.net;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.net.URLStreamHandler;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,11 +9,20 @@ import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
 import com.kloudless.exception.InvalidRequestException;
-import com.kloudless.model.Data;
-import com.kloudless.model.DataDeserializer;
-import com.kloudless.model.KloudlessObject;
-import com.kloudless.model.KloudlessRawJsonObject;
-import com.kloudless.model.KloudlessRawJsonObjectDeserializer;
+import com.kloudless.model.*;
+import sun.net.www.protocol.https.HttpsURLConnectionImpl;
+
+import java.io.*;
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 public abstract class APIResource extends KloudlessObject {
 
@@ -245,15 +236,37 @@ public abstract class APIResource extends KloudlessObject {
 		return conn;
 	}
 
+	private static void allowPatchCommand(java.net.HttpURLConnection conn) {
+    Object target = null;
+    try {
+		  if(conn instanceof HttpsURLConnectionImpl) {
+		    final Field delegate = HttpsURLConnectionImpl.class.getDeclaredField("delegate");
+		    delegate.setAccessible(true);
+		    target = delegate.get(conn);
+      } else {
+		    target = conn;
+      }
+
+      final Field f = HttpURLConnection.class.getDeclaredField("methods");
+		  f.setAccessible(true);
+		  int last = 6; // index 6 is TRACE
+		  //TODO: temp solution to replace trace with patch
+      ((String[])f.get(target))[last] = "PATCH";
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      //TODO: log
+      e.printStackTrace();
+    }
+  }
+
 	private static java.net.HttpURLConnection createPatchConnection(
 			String url, Map<String, Object> params, String query, Map<String, String> keys)
 			throws IOException {
 		java.net.HttpURLConnection conn = createKloudlessConnection(url,
 				keys);
+		allowPatchCommand(conn);
 		conn.setDoOutput(true);
-		conn.setRequestMethod("POST");
+		conn.setRequestMethod("PATCH");
 		conn.setRequestProperty("Content-Type", "application/json");
-		conn.setRequestProperty("X-HTTP-Method-Override", "PATCH");
 		OutputStream output = null;
 		try {
 			output = conn.getOutputStream();
@@ -276,7 +289,62 @@ public abstract class APIResource extends KloudlessObject {
 		OutputStream output = null;
 		// put in body the data for a PUT
 		try {
-			if (params.containsKey("body")) {
+			if(params.containsKey("file")) {
+				java.io.File file = (File) params.get("file");
+				final int partNum = (int)params.get("part_number");
+				final long partSize = (long)params.get("part_size");
+				long endPosition = partNum * partSize;
+				long startPos = 0;
+				int readSize = 8192;
+				if(endPosition > file.length()) {
+					startPos = endPosition - partSize;
+					endPosition = file.length();
+				} else {
+					startPos = endPosition - partSize;
+				}
+				conn.setRequestProperty("Content-Type", "application/octet-stream");
+
+				long contentLength = endPosition - startPos;
+				conn.setRequestProperty("Content-Length", String.valueOf(contentLength));
+				conn.setFixedLengthStreamingMode(contentLength);
+
+				try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+				    BufferedOutputStream bos = new BufferedOutputStream(conn.getOutputStream())) {
+
+					long skip = 0;
+
+					//TODO: not sure this while loop is needed since haven't encountered
+					//      skip < startPos issue
+					while ((skip = bis.skip(startPos)) < startPos) {
+						skip = bis.skip(startPos - skip);
+					}
+
+					byte[] bytes = new byte[readSize];
+
+					int read = bis.read(bytes, 0, readSize);
+					int bytesSent = 0;
+					while(read > 0 && bytesSent < contentLength) {
+						bos.write(bytes, 0, read);
+						bytesSent += read;
+						if((contentLength - bytesSent) < readSize) {
+							readSize = (int)(contentLength - bytesSent);
+							if(readSize > 0) {
+								read = bis.read(bytes, 0, readSize);
+								bos.write(bytes, 0, read);
+							}
+							read = -1;
+						} else {
+							read = bis.read(bytes, 0, readSize);
+						}
+					}
+					if(read > 0) {
+						bos.write(bytes, 0, read);
+					}
+					bos.flush();
+				} catch(IOException ex) {
+					throw ex;
+				}
+			} else if (params.containsKey("body")) {
 				output = conn.getOutputStream();
 				output.write((byte[]) params.get("body"));
 			} else {
@@ -285,6 +353,8 @@ public abstract class APIResource extends KloudlessObject {
 				output = conn.getOutputStream();
 				output.write(GSON.toJson(params).getBytes());
 			}			
+		} catch(IOException ex) {
+			throw ex;
 		} finally {
 			if (output != null) {
 				output.close();
@@ -296,57 +366,68 @@ public abstract class APIResource extends KloudlessObject {
 	private static java.net.HttpURLConnection createPostConnection(
 			String url, Map<String, Object> params, String query, Map<String, String> keys)
 			throws IOException {
-		java.net.HttpURLConnection conn = createKloudlessConnection(url,
-				keys);
+		java.net.HttpURLConnection conn = createKloudlessConnection(url, keys);
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
 
 		if (params == null) {
-			params = new HashMap<String, Object>();
+			params = new HashMap<>();
 		} // hacky fix for create() APIKeys
-		
-		OutputStream output = null;
-		try {
-			if (params.containsKey("file") && params.containsKey("metadata")) {
 
-				Map<?, ?> json = GSON.fromJson((String) params.get("metadata"),
-						Map.class);
-				String name = (String) json.get("name");
-				String twoHyphens = "--";
-				String boundary = "*****";
-				String crlf = "\r\n";
+		BufferedInputStream bis = null;
+		BufferedOutputStream bos = null;
+    try {
+      if (params.containsKey("file")) {
+        conn.setRequestProperty("X-Kloudless-Metadata", (String) params.get("metadata"));
+        conn.setRequestProperty("Content-Type", "application/octet-stream");
+        // get file path
+        File file = (java.io.File)params.get("file");
+        bis = new BufferedInputStream(new FileInputStream(file));
+	      long fileSize = file.length();
+        conn.setRequestProperty("Content-Length", String.valueOf(fileSize));
+	      conn.setFixedLengthStreamingMode(fileSize);
 
-				conn.setRequestProperty("Content-Type",
-						"multipart/form-data;boundary=" + boundary);
-				output = conn.getOutputStream();
-				output.write((crlf + twoHyphens + boundary + crlf)
-						.getBytes(CHARSET));
-				output.write(("Content-Disposition: form-data; name=\"file\";filename=\""
-						+ name + "\"" + crlf).getBytes(CHARSET));
-				output.write(("Content-Type: application/octet-stream" + crlf + crlf)
-						.getBytes(CHARSET));
-				output.write((byte[]) params.get("file"));
-				output.write((crlf + twoHyphens + boundary + crlf)
-						.getBytes(CHARSET));
-				output.write(("Content-Disposition: form-data; name=\"metadata\""
-						+ crlf + crlf).getBytes(CHARSET));
-				output.write((((String) params.get("metadata"))
-						.getBytes(CHARSET)));
-				output.write((crlf + twoHyphens + boundary + crlf)
-						.getBytes(CHARSET));
+        bos = new BufferedOutputStream(conn.getOutputStream());
 
-			} else {
-				conn.setRequestProperty("Content-Type", String
-						.format("application/json;charset=%s",
-								CHARSET));
-				output = conn.getOutputStream();
-				output.write(GSON.toJson(params).getBytes());
-			}
-		} finally {
-			if (output != null) {
-				output.close();
-			}
-		}
+	      int readSize = 8192;
+	      byte[] bytes = null;
+	      if(fileSize < readSize) {
+		      readSize = (int) fileSize;
+	      }
+
+	      bytes = new byte[readSize];
+	      int read = bis.read(bytes, 0, readSize);
+	      int hasRead = read;
+	      int mb = 0;
+	      int oneMb = 1024 * 1024;
+	      while(read != -1) {
+	      	bos.write(bytes, 0, read);
+		      hasRead += read;
+		      //TODO: should replace following line with listeners
+		      if(hasRead >= oneMb) {
+		      	hasRead = 0;
+		      	mb += 1;
+		      	System.out.println(mb + " mb sent!");
+		      }
+		      read = bis.read(bytes, 0, readSize);
+	      }
+      } else {
+        conn.setRequestProperty("Content-Type", String
+            .format("application/json;charset=%s",
+                CHARSET));
+        bos = new BufferedOutputStream(conn.getOutputStream());
+        String json = GSON.toJson(params);
+        bos.write(json.getBytes());
+      }
+    } finally {
+    	if(bos != null) {
+    		bos.flush();
+    		bos.close();
+	    }
+	    if(bis != null) {
+    		bis.close();
+	    }
+    }
 		return conn;
 	}
 
