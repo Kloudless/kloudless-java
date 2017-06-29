@@ -17,6 +17,9 @@ import java.util.List;
 import static com.kloudless.StaticImporter.TestInfo;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static com.kloudless.StaticImporter.TestInfo;
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class KloudlessEventsTest {
 	
 	static Gson GSON = new GsonBuilder().create();

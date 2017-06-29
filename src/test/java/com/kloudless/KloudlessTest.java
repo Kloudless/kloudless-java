@@ -248,8 +248,8 @@ public class KloudlessTest extends KloudlessBaseTest {
 	
 	@Test
 	public void testFileCreate() throws KloudlessException, IOException {
-		final String fileName = "kloudless.key";
 		java.io.File file1 = new java.io.File(TestInfo.getPathUploadingFile());
+		final String fileName = file1.getName();
 		final long size = file1.length();
 		for (String account : testAccounts) {
 			File fileCreated = createTestFile(fileName, file1, getRootFolderId(account),
@@ -509,3 +509,6 @@ public class KloudlessTest extends KloudlessBaseTest {
 //		System.out.println(users);
 	}
 }
+
+
+
