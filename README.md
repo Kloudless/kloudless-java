@@ -1,23 +1,40 @@
-kloudless-java
-==============
-# KloudlessAPI Java Bindings
+# Kloudless API Java Bindings
 
-You can sign up for a Kloudless Developer account at https://developers.kloudless.com.
+You can sign up for a Kloudless Developer account at https://kloudless.com.
 
-Requirements
-============
+# Requirements
 
 Java 1.8 and later.
 
-Installation
-============
+# Installation
 
-You'll need to manually install the following JARs:
+### Maven
 
-* [The Kloudless SDK JAR from S3 with dependencies included](https://s3-us-west-2.amazonaws.com/kloudless-static-assets/p/platform/sdk/kloudless-java-1.0.1.jar)
+Add this dependency to your project's POM:
 
-Usage
-=====
+```xml
+<dependency>
+    <groupId>com.kloudless</groupId>
+    <artifactId>kloudless-java</artifactId>
+    <version>1.0.3</version>
+</dependency>
+```
+
+### Gradle
+
+Add this dependency to your project's build file:
+
+```groovy
+compile 'com.kloudless:kloudless-java:1.0.3'
+```
+
+### Others
+
+You'll need to manually install the Kloudless JAR, either by compiling it or
+downloading it from the [Releases page](https://github.com/Kloudless/kloudless-java/releases/)
+
+# Usage
+
 
 See [KloudlessTest.java](https://github.com/Kloudless/kloudless-java/blob/master/test/com/kloudless/KloudlessTest.java)
 for more examples.
@@ -30,53 +47,72 @@ customHeaders.put("X-Kloudless-As-User", "<USER ID>");
 Kloudless.addCustomHeaders(customHeaders);
 ```
 
-Building
-==========
+# Building
+
 
 * You can create the jar, skipping tests, with `mvn install -DskipTests`.
 * You can create a jar that includes dependencies with `mvn compile assembly:single`.
 * You can gather dependencies for easy installation/deployment with `mvn dependency:copy-dependencies`.
   They will be located in `target/dependencies`.
 
-Testing
-=======
+# Testing
+
 You must have Maven installed. To run the tests, simply run `mvn test`.
-Before tests, api key or bearer token can be specified by using environment 
-variable, program argument, and property file. 
+Before tests, the API key or bearer token can be specified by using environment 
+variables, program arguments, or the property file. The property file is required
+for tests.
+
+## Environment variables
+
 ```
-# environment variable
 API_KEY=keyValue mvn test
 BEARER_TOKEN=tokenValue mvn test
-# program argument
+```
+
+## Program arguments
+
+```
 mvn test -DapiKey=keyValue
 mvn test -DbearerToken=tokenValue
 ```
-You can run particular tests by passing `-D test=Class#method`.
+
+You can run specific tests with the command-line argument `-D test=Class#method`.
 For example, `-D test=KloudlessTest#testAccountAll`.
 
-## kloudless.configuration.properties
-Before testing, please create a file called *kloudless.configuration.properties* under 
-the resources folder of the test project
-### accounts for the test
-_test_accounts_ is the key where multiple accounts can be specified like below
+## Properties file
+
+Before testing, please create a file called
+*kloudless.configuration.properties* under the resources folder of the test
+project.
+
+The API server to direct API requests to can be specified with this file.
+To use a custom server, direct traffic to it as shown below:
+
 ```
-# multiple test accounts use colon to seprate
+api_server_addr         = demo-api.kloudless.com 
+api_server_proto        = https 
+api_server_port         = 443 
+```
+
+You can specify accounts to test with the _test_accounts_ key in the properties
+file:
+
+```
+# multiple test accounts can be separated with a semi-colon
 test_accounts = 1234; 5678; 91011
 ```
-### json data for the test
-_one_test_account_json_ is the key where json data for an account can be specified.
-This [endpoint](https://developers.kloudless.com/docs/v1/authentication#accounts-retrieve-an-account)
-can download the json data for an account
+
+A Kloudless JSON Account object to test with can be included with the
+_one_test_account_json_ key.
+The [Account Metadata endpoint](https://developers.kloudless.com/docs/v1/authentication#accounts-retrieve-an-account)
+can be used to retrieve the JSON representation of the account.
+
 ```
 test_one_test_account_json = {"id":1234,"service":.....}
 ```
-### file to be uploaded for the test
+
+The file to upload during tests can be specified as shown below:
+
 ```
 path_uploading_file=/path/to/a/file
-```
-### server information for the test
-```
-api_server_addr         = localhost 
-api_server_proto        = http
-api_server_port         = 8002 
 ```

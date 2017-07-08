@@ -4,8 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.kloudless</groupId>
 	<artifactId>kloudless-java</artifactId>
-  <version>1.0.1</version>
-	<packaging>jar</packaging>
+  <version>1.0.3</version>
+  <packaging>jar</packaging>
   <name>kloudless-java</name>
   <url>https://github.com/kloudless/kloudless-java</url>
   <description>Kloudless Java Client SDK accessing the Universal APIs of Kloudless Inc.</description>
