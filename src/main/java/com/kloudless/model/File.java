@@ -90,7 +90,8 @@ public class File extends Metadata {
 	 *
 	 * @param accountId
 	 * @param params    - The parameters include:
-	 *                  - file - byte array of file
+	 *                  - body - byte array of file
+	 *                  - file - java.io.File object
 	 *                  - metadata - this is a JSON string of metadata information including
 	 *                  - parent_id - identifier of where the file needs to be placed
 	 *                  - name - name of the file
@@ -125,6 +126,7 @@ public class File extends Metadata {
 	 * @param accountId
 	 * @param params    - The parameters include:
 	 *                  - body - byte array of file
+	 *                  - file - java.io.File object
 	 * @return File
 	 * @throws APIException
 	 * @throws AuthenticationException

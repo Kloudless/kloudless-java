@@ -42,7 +42,9 @@ public class KloudlessTest extends KloudlessBaseTest {
 		AccountCollection accounts = Account.all(null);
 		List<Account> list = accounts.objects.stream().filter(x -> testAccounts
 				.contains(x.id)).collect(Collectors.toList());
-		assertThat(list.size()).isGreaterThan(0);
+		if (testAccounts.size() > 0) {
+			assertThat(list.size()).isGreaterThan(0);
+		}
 	}
 	
 	@Test

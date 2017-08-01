@@ -30,9 +30,8 @@ public class User extends APIResourceMixin  {
 			throws APIException, AuthenticationException,
 			InvalidRequestException, APIConnectionException {
 		
-		String path = String.format("%s/%s/%s",
+		String path = String.format("%s/%s",
 				instanceURL(Account.class, accountId),
-				"team",
 				classURL(User.class));
 		return all(path, params, UserCollection.class, null);
 	}
@@ -54,9 +53,8 @@ public class User extends APIResourceMixin  {
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		
-		String path = String.format("%s/%s/%s",
+		String path = String.format("%s/%s",
 				instanceURL(Account.class, accountId),
-				"team",
 				instanceURL(User.class, id));
 		return retrieve(path, params, User.class, null);
 	}
@@ -78,9 +76,8 @@ public class User extends APIResourceMixin  {
 			throws APIException, AuthenticationException,
 			InvalidRequestException, APIConnectionException {
 		
-		String path = String.format("%s/%s/%s/%s",
+		String path = String.format("%s/%s/%s",
 				instanceURL(Account.class, accountId),
-				"team",
 				instanceURL(User.class, id),
 				"memberships");
 		return all(path, params, GroupCollection.class, null);

@@ -25,12 +25,12 @@ public abstract class APIResourceMixin extends APIResource {
 	 * @throws APIConnectionException
 	 */
 	protected static <T> T all(String path, Map<String, Object> params,
-			Class<T> clazz, Map<String, String> keys) throws APIException,
+			Class<T> clazz, Map<String, String> headers) throws APIException,
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
-		
+				
 		KloudlessResponse response = request(RequestMethod.GET, path, params,
-					keys);
+					headers);
 		int rCode = response.responseCode;
 		String rBody = response.responseBody;
 		if (rCode < 200 || rCode >= 300) {

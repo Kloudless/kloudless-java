@@ -113,7 +113,7 @@ public final class TestInfoHelper {
 		if (opt.isPresent() && opt.get().length() > 0) {
 			apiKey = opt.get().trim();
 		} else {
-			opt = Optional.ofNullable(System.getProperty(API_KEY_ARG));
+			opt = Optional.ofNullable(Props.getProperty(API_KEY_ARG));
 			if (opt.isPresent() && opt.get().length() > 0) {
 				apiKey = opt.get().trim();
 			}
@@ -123,7 +123,7 @@ public final class TestInfoHelper {
 		if (opt.isPresent() && opt.get().length() > 0) {
 			beaerToken = opt.get().trim();
 		} else {
-			opt = Optional.ofNullable(System.getProperty(BEARER_TOKEN_ARG));
+			opt = Optional.ofNullable(Props.getProperty(BEARER_TOKEN_ARG));
 			if (opt.isPresent() && opt.get().length() > 0) {
 				beaerToken = opt.get().trim();
 			}
