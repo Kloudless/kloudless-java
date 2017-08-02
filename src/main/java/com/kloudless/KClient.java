@@ -1,8 +1,10 @@
 package com.kloudless;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import com.kloudless.exception.APIConnectionException;
 import com.kloudless.exception.APIException;
 import com.kloudless.exception.AuthenticationException;
@@ -11,8 +13,14 @@ import com.kloudless.model.Account;
 import com.kloudless.model.AccountCollection;
 import com.kloudless.model.Application;
 import com.kloudless.model.ApplicationCollection;
+import com.kloudless.model.CRMAccount;
+import com.kloudless.model.CRMObject;
+import com.kloudless.model.CRMObjectCollection;
 import com.kloudless.model.EventCollection;
+import com.kloudless.model.File;
 import com.kloudless.model.Folder;
+import com.kloudless.model.Group;
+import com.kloudless.model.GroupCollection;
 import com.kloudless.model.Link;
 import com.kloudless.model.LinkCollection;
 import com.kloudless.model.MetadataCollection;
@@ -20,6 +28,8 @@ import com.kloudless.model.Permission;
 import com.kloudless.model.PermissionCollection;
 import com.kloudless.model.Property;
 import com.kloudless.model.PropertyCollection;
+import com.kloudless.model.User;
+import com.kloudless.model.UserCollection;
 import com.kloudless.net.APIResource;
 import com.kloudless.net.KloudlessResponse;
 
@@ -52,6 +62,7 @@ public class KClient extends APIResource {
 	protected String bearerToken = null;
 	protected String accountId = null;
 	protected HashMap<String, String> additionalHeaders = null;
+	protected Gson gson = new Gson();
 	
 	/*
 	 * Main Constructor
@@ -82,11 +93,12 @@ public class KClient extends APIResource {
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
 	 */
 	@SuppressWarnings("unchecked")
 	public <S, T> T create(Map<String, String> queryParams, Class<S> clazz,
 			Map<String, Object> bodyParams) throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+			InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
 
 		return (T) this.authenticatedRequest(null, "POST",
 				queryParams, this.formatPath(clazz, null, null), bodyParams, clazz);
@@ -105,11 +117,12 @@ public class KClient extends APIResource {
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
 	 */
 	@SuppressWarnings("unchecked")
 	public <S, T> T all(Map<String, String> queryParams, Class<S> clazz)
 			throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+			InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
 
 		Class<T> responseClazz = null;
 		if (clazz == Account.class) {
@@ -118,6 +131,8 @@ public class KClient extends APIResource {
 			responseClazz = (Class<T>) ApplicationCollection.class;
 		} else if (clazz == Link.class) {
 			responseClazz = (Class<T>) LinkCollection.class;
+		} else if (clazz == CRMAccount.class || clazz == CRMObject.class) {
+			responseClazz = (Class<T>) CRMObjectCollection.class;
 		}
 		
 		return (T) this.authenticatedRequest(null, "GET",
@@ -136,10 +151,11 @@ public class KClient extends APIResource {
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
 	 */
 	public <S> S retrieve(Map<String, String> queryParams, Class<S> clazz,
 			String id) throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+			InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
 
 		return (S) this.authenticatedRequest(null, "GET",
 				queryParams, this.formatPath(clazz, id, null), null, clazz);
@@ -159,11 +175,12 @@ public class KClient extends APIResource {
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
 	 */
 	@SuppressWarnings("unchecked")
 	public <S, T> T update(Map<String, String> queryParams, Class<S> clazz,
 			String id, Map<String, Object> bodyParams) throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+			InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
 
 		return (T) this.authenticatedRequest(null, "PATCH", queryParams,
 				this.formatPath(clazz, id, null), bodyParams, clazz);
@@ -183,11 +200,12 @@ public class KClient extends APIResource {
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
 	 */
 	@SuppressWarnings("unchecked")
 	public <S, T> T save(Map<String, String> queryParams, Class<S> clazz,
 			String id, Map<String, Object> bodyParams) throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+			InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
 
 		return (T) this.authenticatedRequest(null, "PUT", queryParams,
 				this.formatPath(clazz, null, null), bodyParams, clazz);
@@ -205,10 +223,11 @@ public class KClient extends APIResource {
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
 	 */
 	public <S> KloudlessResponse delete(Map<String, String> queryParams, Class<S> clazz,
 			String id) throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+			InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
 
 		return (KloudlessResponse) this.authenticatedRequest(null, "DELETE",
 				queryParams, this.formatPath(clazz, id, null), null, null);
@@ -274,13 +293,14 @@ public class KClient extends APIResource {
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T authenticatedRequest(Map<String, String> headers,
 			String method, Map<String, String> queryParams,
 			String path, Map<String, Object> bodyParams, Class<T> responseClazz)
 			throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+			InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
 
 		if (headers == null) {
 			headers = new HashMap<String, String>();
@@ -321,12 +341,13 @@ public class KClient extends APIResource {
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
 	 */
 	public KloudlessResponse rawRequest(Map<String, String> headers,
 			String method, Map<String, String> queryParams,
 			String path, Map<String, Object> bodyParams) throws APIException,
 			AuthenticationException, InvalidRequestException,
-			APIConnectionException {
+			APIConnectionException, UnsupportedEncodingException {
 
 		String requestPath;
 		if (queryParams == null) {
@@ -334,10 +355,13 @@ public class KClient extends APIResource {
 		} else {
 			StringBuilder queryParamString = new StringBuilder("?");
 			for (String key : queryParams.keySet()) {
-				queryParamString.append(String.format("%s=%s", key,
-						queryParams.get(key)));
+				if (queryParamString.length() != 1) {
+					queryParamString.append("&");
+				}
+				queryParamString.append(String.format("%s=%s", urlEncode(key),
+						urlEncode(queryParams.get(key))));
 			}
-			requestPath = String.format("%s%s", path, queryParamString);			
+			requestPath = String.format("%s%s", path, queryParamString);
 		}
 		
 		RequestMethod httpMethod = RequestMethod.GET;
@@ -382,11 +406,12 @@ public class KClient extends APIResource {
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
 	 */
 	@SuppressWarnings("unchecked")
 	public <S, T> T contents(Map<String, String> queryParams, Class<S> clazz,
 			String id) throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+			InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
 		
 		String path = String.format("%s/%s",
 				instanceURL(Account.class, this.accountId),
@@ -399,6 +424,143 @@ public class KClient extends APIResource {
 
 		return (T) this.authenticatedRequest(null, "GET", queryParams, path,
 				null, responseClazz);
+	}
+	
+	/**
+	 * Makes a request to upload a file easily.
+	 * 
+	 * @param parent_id
+	 * @param name
+	 * @param overwrite
+	 * @param path - path to a file
+	 * @return
+	 * @throws APIException
+	 * @throws AuthenticationException
+	 * @throws InvalidRequestException
+	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
+	 */
+	public File uploadFile(String parent_id, String name, boolean overwrite,
+			String path) throws APIException, AuthenticationException,
+			InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
+		java.io.File file = new java.io.File(path);
+		HashMap<String, Object> fileParams = new HashMap<String, Object>();
+		HashMap<String, String> metadata = new HashMap<String, String>();
+		HashMap<String, String> queryParams = new HashMap<String, String>();
+		if (overwrite) {
+			queryParams.put("overwrite", "true");
+		}
+		metadata.put("parent_id", parent_id);
+		metadata.put("name", name);
+		fileParams.put("metadata", gson.toJson(metadata));
+		fileParams.put("file", file);
+		File newFile = this.create(null, File.class, fileParams);
+		return newFile;
+	}
+	
+	/**
+	 * Makes a request to retrieve permissions for a specific file or folder.
+	 * 
+	 * @param id
+	 * @param clazz
+	 * @return
+	 * @throws InvalidRequestException
+	 * @throws APIException
+	 * @throws AuthenticationException
+	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
+	 */
+	public <T> PermissionCollection listPermissions(String id, Class<T> clazz)
+			throws InvalidRequestException, APIException,
+			AuthenticationException, APIConnectionException, UnsupportedEncodingException {
+		String path = this.formatPath(clazz, id, "permissions");		
+		return (PermissionCollection) this.authenticatedRequest(null, "GET",
+				null, path, null, PermissionCollection.class);
+	}
+	
+	/**
+	 * Makes a request to update permissions of a specific file or folder.
+	 * Overwrite makes use of a PUT request instead of a PATCH.
+	 * A PermissionCollection is used for better usability.
+	 * 
+	 * @param id
+	 * @param clazz
+	 * @param overwrite
+	 * @param newPermissions
+	 * @return
+	 * @throws APIException
+	 * @throws AuthenticationException
+	 * @throws InvalidRequestException
+	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
+	 */
+	public <T> PermissionCollection setPermissions(String id, Class<T> clazz,
+			boolean overwrite, PermissionCollection newPermissions) throws APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
+		String path = this.formatPath(clazz, id, "permissions");
+		String method = overwrite ? "PUT" : "PATCH";
+		
+		HashMap<String, Object> bodyParams = new HashMap<String, Object>();
+		bodyParams.put("body", gson.toJson(newPermissions.permissions)
+				.toString().getBytes());
+		
+		return (PermissionCollection) this.authenticatedRequest(null, method,
+				null, path, bodyParams, PermissionCollection.class);
+	}	
+
+	/***
+	 * Common CRM Methods
+	 */
+	
+	/**
+	 * Makes a request to search for CRM content based on the query
+	 * and lang.
+	 * 
+	 * @param query
+	 * @param lang
+	 * @param page_size
+	 * @param page
+	 * @return
+	 * @throws APIConnectionException 
+	 * @throws InvalidRequestException 
+	 * @throws AuthenticationException 
+	 * @throws APIException 
+	 * @throws UnsupportedEncodingException 
+	 */
+	public CRMObjectCollection crmSearch(String query, String lang,
+			int page_size, String page) throws APIException, AuthenticationException, InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
+		
+		String path = this.formatPath(null, null, "crm/search");
+		
+		HashMap<String, String> queryParams = new HashMap<String, String>();
+		queryParams.put("q", query);
+		queryParams.put("lang", lang);
+		queryParams.put("page_size", String.valueOf(page_size));
+		queryParams.put("page", page);
+
+		return (CRMObjectCollection) this.authenticatedRequest(null, "GET",
+				queryParams, path, null, CRMObjectCollection.class);
+	}
+	
+	public CRMObjectCollection crmSchema(String type, int page_size, String page)
+			throws InvalidRequestException, APIException,
+			AuthenticationException, APIConnectionException,
+			UnsupportedEncodingException {
+
+		String path;
+		HashMap<String, String> queryParams = new HashMap<String, String>();
+		if (type == null || type.isEmpty()) {
+			path = this.formatPath(null, null, "crm/schemas");
+			if (page != null && !page.isEmpty()) {
+				queryParams.put("page_size", String.valueOf(page_size));
+				queryParams.put("page", page);				
+			}
+		} else {
+			path = this.formatPath(null, null,
+					String.format("crm/schemas/%s", type));			
+		}
+
+		return (CRMObjectCollection) this.authenticatedRequest(null, "GET",
+				queryParams, path, null, CRMObjectCollection.class);
 	}
 	
 	/***
@@ -415,10 +577,11 @@ public class KClient extends APIResource {
 	 * @throws AuthenticationException
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException 
 	 */
 	public EventCollection events(Map<String, String> queryParams)
 			throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+			InvalidRequestException, APIConnectionException, UnsupportedEncodingException {
 
 		String path = String.format("%s/events",
 				instanceURL(Account.class, this.accountId));
@@ -427,4 +590,51 @@ public class KClient extends APIResource {
 				queryParams, path, null, EventCollection.class);
 	}
 
+	/***
+	 * Common Team Methods
+	 */
+
+	/**
+	 * Makes a request for all of the user's group memberships.
+	 * 
+	 * @param userId
+	 * @return
+	 * @throws InvalidRequestException
+	 * @throws APIException
+	 * @throws AuthenticationException
+	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException
+	 */
+	public GroupCollection teamMemberships(String userId)
+			throws InvalidRequestException, APIException,
+			AuthenticationException, APIConnectionException,
+			UnsupportedEncodingException {
+
+		String path = this.formatPath(User.class, userId, "memberships");
+
+		return (GroupCollection) this.authenticatedRequest(null, "GET", null,
+				path, null, GroupCollection.class);
+	}
+
+	/**
+	 * 
+	 * @param groupId
+	 * @return
+	 * @throws InvalidRequestException
+	 * @throws APIException
+	 * @throws AuthenticationException
+	 * @throws APIConnectionException
+	 * @throws UnsupportedEncodingException
+	 */
+	public UserCollection teamMembers(String groupId)
+			throws InvalidRequestException, APIException,
+			AuthenticationException, APIConnectionException,
+			UnsupportedEncodingException {
+
+		String path = this.formatPath(Group.class, groupId, "members");
+
+		return (UserCollection) this.authenticatedRequest(null, "GET", null,
+				path, null, UserCollection.class);
+	}
+	
 }

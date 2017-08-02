@@ -13,6 +13,7 @@ public class Permission extends APIResourceMixin {
 	public String email;
 	public String name;
 	public String role;
+	public String type;
 	
 	/**
 	 * Makes a Kloudless API Request returning a PermissionCollection (list of Permission objects).

@@ -58,12 +58,26 @@ public abstract class APIResource extends KloudlessObject {
 			}
 		};
 		
+		HashMap<String, String> crmClasses = new HashMap<String, String>() {{		
+			put("crmaccount", "account");
+			put("crmcontact", "contact");
+			put("crmlead", "lead");
+			// TODO: fixme
+			put("crmopportunity", "opportunitie");
+			put("crmcampaign", "campaigns");
+			put("crmtask", "tasks");
+			// Raw
+			put("crmobject", "object");			
+		}};
+		
 		String single = singleClassURL(clazz);
 		String prefix = null;
 		if (storageClasses.contains(single)) {
 			prefix = String.format("%s/%s", "storage", single);
 		} else if (teamClasses.contains(single)) {
 			prefix = String.format("%s/%s", "team", single);
+		} else if (crmClasses.containsKey(single)) {
+			prefix = String.format("%s/%s", "crm", crmClasses.get(single));		
 		} else {
 			prefix = single;
 		}
@@ -110,7 +124,7 @@ public abstract class APIResource extends KloudlessObject {
 		GET, PATCH, POST, PUT, DELETE
 	}
 
-	private static String urlEncode(String str)
+	protected static String urlEncode(String str)
 			throws UnsupportedEncodingException {
 		// Preserve original behavior that passing null for an object id will
 		// lead
@@ -241,7 +255,16 @@ public abstract class APIResource extends KloudlessObject {
 
 	private static java.net.HttpURLConnection createGetConnection(String url,
 			String query, Map<String, String> headers) throws IOException {
-		String getURL = String.format("%s?%s", url, query);
+		String getURL;
+		if (!query.isEmpty()) {
+			if (url.contains("?")) {
+				getURL = String.format("%s&%s", url, query);
+			} else {
+				getURL = String.format("%s?%s", url, query);
+			}
+		} else {
+			getURL = url;
+		}
 		java.net.HttpURLConnection conn = createKloudlessConnection(getURL,
 				headers);
 		conn.setRequestMethod("GET");
@@ -282,8 +305,13 @@ public abstract class APIResource extends KloudlessObject {
 		conn.setRequestProperty("Content-Type", "application/json");
 		OutputStream output = null;
 		try {
-			output = conn.getOutputStream();
-			output.write(GSON.toJson(params).getBytes());
+			if (params.containsKey("body")) {
+				output = conn.getOutputStream();
+				output.write((byte[]) params.get("body"));
+			} else {
+				output = conn.getOutputStream();
+				output.write(GSON.toJson(params).getBytes());
+			}
 		} finally {
 			if (output != null) {
 				output.close();
