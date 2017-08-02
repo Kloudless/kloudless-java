@@ -16,7 +16,7 @@ Add this dependency to your project's POM:
 <dependency>
     <groupId>com.kloudless</groupId>
     <artifactId>kloudless-java</artifactId>
-    <version>1.0.3</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -25,7 +25,7 @@ Add this dependency to your project's POM:
 Add this dependency to your project's build file:
 
 ```groovy
-compile 'com.kloudless:kloudless-java:1.0.3'
+compile 'com.kloudless:kloudless-java:1.1.0'
 ```
 
 ### Others
@@ -46,6 +46,27 @@ HashMap<String, String> customHeaders = new HashMap<String, String>();
 customHeaders.put("X-Kloudless-As-User", "<USER ID>");
 Kloudless.addCustomHeaders(customHeaders);
 ```
+
+## Instantiating a Kloudless Client
+
+The 1.1.0 version of the Kloudless Java SDK includes the KClient class, which
+allows you to instantiate a client with a specific bearer token and account id.
+
+It is fairly basic to instantiate:
+
+```java
+// Instantiation
+KClient storageClient = new KClient("token12345", "accountID12345", null);
+
+// Retrieve contents of Folder with id "root"
+storageClient.contents(null, Folder.class, "root");
+```
+
+If you want to add user impersonation, the 3rd argument is for any additional
+headers that will be added to all requests.
+
+See [KloudlessClientTest.java](https://github.com/Kloudless/kloudless-java/blob/master/test/com/kloudless/KloudlessClientTest.java) for more examples.
+
 
 # Building
 

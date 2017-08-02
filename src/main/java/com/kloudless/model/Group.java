@@ -28,9 +28,8 @@ public class Group extends APIResourceMixin {
 	public static GroupCollection all(String accountId, Map<String, Object> params)
 			throws APIException, AuthenticationException,
 			InvalidRequestException, APIConnectionException {
-		String path = String.format("%s/%s/%s",
+		String path = String.format("%s/%s",
 				instanceURL(Account.class, accountId),
-				"team",
 				classURL(Group.class));
 		return all(path, params, GroupCollection.class, null);
 	}
@@ -52,9 +51,8 @@ public class Group extends APIResourceMixin {
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		
-		String path = String.format("%s/%s/%s",
+		String path = String.format("%s/%s",
 				instanceURL(Account.class, accountId),
-				"team",
 				instanceURL(Group.class, id));
 		return retrieve(path, params, Group.class, null);
 	}
@@ -77,9 +75,8 @@ public class Group extends APIResourceMixin {
 			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
 		
-		String path = String.format("%s/%s/%s/%s",
+		String path = String.format("%s/%s/%s",
 				instanceURL(Account.class, accountId),
-				"team",
 				instanceURL(Group.class, id),
 				"members");
 		return all(path, params, UserCollection.class, null);

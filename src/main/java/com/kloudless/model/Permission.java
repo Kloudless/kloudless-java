@@ -13,6 +13,7 @@ public class Permission extends APIResourceMixin {
 	public String email;
 	public String name;
 	public String role;
+	public String type;
 	
 	/**
 	 * Makes a Kloudless API Request returning a PermissionCollection (list of Permission objects).
@@ -28,25 +29,20 @@ public class Permission extends APIResourceMixin {
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
 	 */
-	public static PermissionCollection all(String id, String accountId,  String type,
-			Map<String, Object> params) throws APIException, 
-			AuthenticationException, InvalidRequestException, 
+	public static PermissionCollection all(String id, String accountId,
+			String type, Map<String, Object> params) throws APIException,
+			AuthenticationException, InvalidRequestException,
 			APIConnectionException {
-		
+
 		String path = null;
 		if (type == "folder") {
 			path = String.format("%s/%s/%s",
 					instanceURL(Account.class, accountId),
-					instanceURL(Folder.class, id),
-					classURL(Permission.class)
-			);
-		}
-		else if (type=="file") {
+					instanceURL(Folder.class, id), classURL(Permission.class));
+		} else if (type == "file") {
 			path = String.format("%s/%s/%s",
 					instanceURL(Account.class, accountId),
-					instanceURL(File.class, id),
-					classURL(Permission.class) 
-			);
+					instanceURL(File.class, id), classURL(Permission.class));
 		}
 		return all(path, params, PermissionCollection.class, null);
 	}
@@ -66,23 +62,19 @@ public class Permission extends APIResourceMixin {
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
 	 */
-	public static PermissionCollection update(String id, String accountId, String type, Map<String, Object> params)
-			throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+	public static PermissionCollection update(String id, String accountId,
+			String type, Map<String, Object> params) throws APIException,
+			AuthenticationException, InvalidRequestException,
+			APIConnectionException {
 		String path = null;
 		if (type == "folder") {
 			path = String.format("%s/%s/%s",
 					instanceURL(Account.class, accountId),
-					instanceURL(Folder.class, id),
-					classURL(Permission.class)
-			);
-		}
-		else if (type=="file") {
+					instanceURL(Folder.class, id), classURL(Permission.class));
+		} else if (type == "file") {
 			path = String.format("%s/%s/%s",
 					instanceURL(Account.class, accountId),
-					instanceURL(File.class, id),
-					classURL(Permission.class) 
-			);
+					instanceURL(File.class, id), classURL(Permission.class));
 		}
 		return update(path, params, PermissionCollection.class, null);
 	}
@@ -102,25 +94,21 @@ public class Permission extends APIResourceMixin {
 	 * @throws InvalidRequestException
 	 * @throws APIConnectionException
 	 */
-	public static PermissionCollection save(String id, String accountId, String type, Map<String, Object> params)
-			throws APIException, AuthenticationException,
-			InvalidRequestException, APIConnectionException {
+	public static PermissionCollection save(String id, String accountId,
+			String type, Map<String, Object> params) throws APIException,
+			AuthenticationException, InvalidRequestException,
+			APIConnectionException {
 
 		String path = null;
 		if (type == "folder") {
 			path = String.format("%s/%s/%s",
 					instanceURL(Account.class, accountId),
-					instanceURL(Folder.class, id),
-					classURL(Permission.class)
-			);
-		}
-		else if (type=="file") {
+					instanceURL(Folder.class, id), classURL(Permission.class));
+		} else if (type == "file") {
 			path = String.format("%s/%s/%s",
 					instanceURL(Account.class, accountId),
-					instanceURL(File.class, id),
-					classURL(Permission.class) 
-			);
+					instanceURL(File.class, id), classURL(Permission.class));
 		}
 		return save(path, params, PermissionCollection.class, null);
-	} 
+	}
 }
