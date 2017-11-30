@@ -36,7 +36,7 @@ downloading it from the [Releases page](https://github.com/Kloudless/kloudless-j
 # Usage
 
 
-See [KloudlessTest.java](https://github.com/Kloudless/kloudless-java/blob/master/test/com/kloudless/KloudlessTest.java)
+See [KloudlessTest.java](https://github.com/Kloudless/kloudless-java/blob/master/src/test/java/com/kloudless/KloudlessTest.java)
 for more examples.
 
 User Impersonation can be seen found in KloudlessTest.java or the example below:
@@ -65,7 +65,7 @@ storageClient.contents(null, Folder.class, "root");
 If you want to add user impersonation, the 3rd argument is for any additional
 headers that will be added to all requests.
 
-See [KloudlessClientTest.java](https://github.com/Kloudless/kloudless-java/blob/master/test/com/kloudless/KloudlessClientTest.java) for more examples.
+See [KloudlessClientTest.java](https://github.com/Kloudless/kloudless-java/blob/master/src/test/java/com/kloudless/KloudlessClientTest.java) for more examples.
 
 
 # Building
