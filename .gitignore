@@ -6,9 +6,12 @@
 .classpath
 .project
 .settings
-**.properties
+.gradle
+.vscode
 
 target
+bin
+build
 
 # Package Files #
 *.jar
@@ -21,5 +24,4 @@ hs_err_pid*
 .idea/**
 uiDesigner.xml
 com.kloudless.testsdk/
-
 
