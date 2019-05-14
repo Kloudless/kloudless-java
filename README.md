@@ -4,22 +4,32 @@ You can sign up for a Kloudless Developer account at https://kloudless.com.
 
 # Table of Contents
 * [Requirements](#requirements)
-* [Installation](＃installation)
+* [Installation](#installation)
+    * [Maven](#maven)
+    * [Gradle](#gradle)
+    * [Others](#others)
 * [Getting Started](#getting-started)
-    * [Obtain bearer token](#obtain-bearer-token)
-    * [Initialize an Account](#initialize-an-account)
-        * [What is an Account](#what-is-an-account)
-    * [Make API reqeusts](#make-api-requests)
+    * [Obtaining a Bearer Token](#obtaining-a-bearer-token)
+        * [Out-of-band OAuth Flow](#out-of-band-oauth-flow)
+        * [3-Legged OAuth Flow](#3-legged-oauth-flow)
+            * [First Leg](#first-leg)
+            * [Third Leg](#third-leg)
+    * [Initializing an Account](#initializing-an-account)
+        * [What is an Account?](#what-is-an-account)
+        * [Initializing an Account by Bearer Token](#initializing-an-account-by-bearer-token)
+        * [Initializing an Account by API Key and Account ID](#initializing-an-account-by-api-key-and-account-id)
+        * [Verifying the Account Bearer Token](#verifying-the-account-bearer-token)
+    * [Making API Requests](#making-api-requests)
         * [How to get Resource and ResourceList](#how-to-get-resource-and-resourcelist)
         * [Resource](#resource)
             * [Basic usages](#basic-usages)
-            * [Resource supports file opeartion](#resource-supports-file-opeartion)
-            * [Get RawData from upstream service](#get-rawdata-from-upstream-service)
+            * [Resource File Operations](#resource-file-operations)
+            * [Getting RawData from Upstream Services](#getting-rawdata-from-upstream-services)
         * [ResourceList](#resourcelist)
-            * [Pagination of ResourceList](#pagination-of-resourcelist)
-            * [Autopagination of ResourceList](#autopagination-of-resourcelist)
+            * [ResourceList Pagination](#resourcelist-pagination)
+            * [ResourceList Auto-pagination](#resourcelist-auto-pagination)
         * [ResponseRaw](#responseraw)
-    * [Other usage of Account](#other-usage-of-account)
+    * [Other Usages of Account](#other-usages-of-account)
         * [Pass-through API](#pass-through-api)
 * [Build](#build)
 
@@ -57,18 +67,18 @@ downloading it from the [Releases page](https://github.com/Kloudless/kloudless-j
 
 # Getting Started
 
-## Obtain bearer token
+## Obtaining a Bearer Token
 
 API requests to Kloudless require Bearer Token Authentication.  We will describe two ways to obtain 
-the Bearer Token via OAuth 2.0.
+the Bearer Token via OAuth 2.0 below.
 
 ### Out-of-band OAuth Flow
 1. Find the Application ID (App ID) located [here](https://developers.kloudless.com/applications/*/details) 
 and copy it to your clipboard.
-2. Visit the following URL, but replace APPLICATION_ID with the APP ID in your clipboard: 
+2. Visit the following URL, but replace APPLICATION_ID with the APP ID from your clipboard: 
 https://api.kloudless.com/v1/oauth/?&scope=any.storage&client_id=APPLICATION_ID&response_type=token&state=13373
 3. After granting access to a specific cloud service, you should be able to obtain an access token 
-(A.K.A Secret Token) for the account. Please copy this onto your clipboard.
+(A.K.A Secret Token) for the account. Please copy this to your clipboard.
 
 Now you can initialize the Java SDK with the following account to make requests.
 
@@ -79,7 +89,7 @@ Account account = new Account("YOUR BEARER TOKEN");
 ### 3-Legged OAuth Flow
 
 The Java SDK also provides a programmatic way for the developer to implement the 3-Legged OAuth Flow
- with the help of a webserver. Please see the additional documentation 
+ with the help of a webserver. Please refer to the additional documentation 
  located [here](https://developers.kloudless.com/docs/v1/authentication#oauth-2.0).
 
 #### First Leg
@@ -87,15 +97,16 @@ The Java SDK also provides a programmatic way for the developer to implement the
 1. Find the Application ID (App ID) located 
 [here](https://developers.kloudless.com/applications/*/details) and copy it to your clipboard.
 2. Determine the scope of what cloud services your users need to have to authenticate their account.
- The scope all includes all services Kloudless supports.
+ The scope `all` includes all services Kloudless supports.
 3. The Redirect URI is of the webserver that the authenticated user will be redirected from. See 
-documentation [here](https://developers.kloudless.com/applications/*/details#oauth-settings).
+ documentation [here](https://developers.kloudless.com/applications/*/details#oauth-settings) for more
+ details.
 4. Fill in the `App ID`, `Redirect URI`, and `Scope` below to retrieve the Authorization URL.
-5. Store the state which could be used in the third leg step.
+5. Store the state for later use during third leg step.
 6. Redirect the user to this URL to begin the second leg of the OAuth flow process.
 
 The example below shows how to retrieve a token in the context of a web application. The 
-`Application` class helps generate an Authorization URL that we redirect the user to after storing 
+`Application` class helps generate an Authorization URL that redirects the user to after storing 
 the `state` data generated to check when the user returns to our app.
 
 
@@ -116,10 +127,10 @@ get("/", (request, response) -> {
 
 You will need to take the response from the 2nd leg after the user is redirected and call this 
 helper method in the Java SDK to obtain an access token. This access token will use the Bearer Token
- Authentication. See the documentation 
+ Authentication. Additional documentation available 
 [here](https://developers.kloudless.com/docs/v1/authentication#header-authorization-code-grant-flow-1).
 
-1. State : Obtained from the user after redirecting 
+1. State: Obtained from the user after redirecting 
 2. Code: Obtained from the user after redirecting
 3. Redirect URI: The Redirect URI specified in the First Leg
 4. Client ID: App ID in First Leg
@@ -149,28 +160,28 @@ get("/callback", (request, response) -> {
 });
 ```
 
-## Initialize an Account
+## Initializing an Account
 
 If you already know your bearer token, you can instantiate an instance of the `Account` class with 
 the token.
 
-### What is an Account
+### What is an Account?
 
 The Account class is the core of the Kloudless Java SDK. The account represents the authorized cloud
- service that the user connected. We've included some examples of Kloudless API requests using the 
- instantiated account object below. The Kloudless Java SDK also has three response classes: 
- `Resource`, `ResourceList`, and `ResponseRaw`. We've also included examples on how to use these 
- response objects returned from the API requests.
+ service that the user is connected to. Below are some examples of Kloudless API requests using the 
+ instantiated account. The Kloudless Java SDK also has three response classes: 
+ `Resource`, `ResourceList`, and `ResponseRaw`. Examples on how to use these 
+ response objects returned from the API requests are also included below.
 
-### Initialize Account by bearer token
+### Initializing an Account by Bearer Token
 
 ```java
 Account account = new Account("YOUR BEARER TOKEN");
 ```
 
-### Initialize Account by API Key and Account Id
+### Initializing an Account by API Key and Account ID
 
-You can also use the Account Id and API Key to instantiate an Account object.
+You can also use the Account ID and API Key to instantiate an Account object.
 
 ```java
 Account account = new Account("accountId", "YOUR API KEY");
@@ -184,17 +195,16 @@ We recommend verifying the token retrieved with your Application ID.
 boolean isMatch = Application.verifyToken("YOUR BEARER TOKEN", "YOUR APP ID");
 ```
 
-## Make API Requests
+## Making API Requests
 
 ### How to get Resource and ResourceList
 
-`Resource` and `ResourceList` will be generated by our SDK, and what object is constructed depends 
-on the types of data from Kloudless API server. If Kloudless API Server outputs a JSONObject list, 
-Account will transfer it as ResourceList and it contains a List of Resource objects. After you got 
-the Resource object, you can find what information you need inside the Resource object, for 
-example id and name.
+The Kloudless SDK will generate different objects for different types of data returned by the
+Kloudless API Server. If Kloudless API Server returns a JSONObject list, the returned object will 
+be a `ResourceList` that it contains a List of `Resource` objects. Return data such as ID and name
+can be found inside each `Resource` object.
 
-In the example below, we showcase how to retrieve all calendars of a calendar cloud service account, 
+The example below showcases how to retrieve all calendars of a calendar cloud service account, 
 such as Google Calendar or Outlook Calendar.
 
 ```java
@@ -217,8 +227,8 @@ System.out.println(calendarData.get("name").getAsString());
 
 ### Resource
 
-The `Resource` class represents the basic JSON response returned by the API server. In addition, 
-the class includes helper methods to make HTTP requests directly on the resource.
+The `Resource` class represents a basic JSON response returned by the API server. 
+It also has helper methods for making HTTP requests.
 
 #### Basic usages
 
@@ -238,10 +248,10 @@ Resource modifiedCalendar = myCalendar.patch(updateContent);
 modifiedCalendar.delete();
 ```
 
-#### Resource supports file opeartion
+#### Resource File Operations
 After you've retrieved a `Resource` object, you can also modify the contents or metadata of the 
-object via the `patch` or `put` helper methods. Please refer to the example of a file type 
-`Resource` below.
+object via the `patch` or `put` helper methods. Please refer to the file type 
+`Resource` example below.
 
 ```java
 Resource file = (Resource) account.get("storage/files/" + fileId);
@@ -259,11 +269,11 @@ Resource modifiedFileContent = file.put(newFile);
 modifiedFileContent.delete();
 ```
 
-#### Get RawData from upstream service
+#### Getting RawData from Upstream Services
 
 The Kloudless API unifies data retrieved from the upstream service. However, if you would like to 
-parse the raw data returned, please set the `X-Kloudless-Raw-Data` header attribute to `true`. The 
-raw data will be returned in the `raw` field of the JSON response.
+parse the raw data returned yourself, you can set the `X-Kloudless-Raw-Data` header attribute to 
+`true`. The raw data will be returned in the `raw` field of the JSON response.
 
 ```java
 Map<String, Object> headers = new HashMap<String, Object>();
@@ -277,12 +287,12 @@ System.out.println(calendarRaw.getData().get("raw").toString());
 The ResourceList Class is a collection of Resource objects, and it has additional helper methods 
 below.
 
-#### Pagination of ResourceList
+#### ResourceList Pagination
 
-Since the Kloudless API supports pagination when a list of resources is returned, the `ResourceList` 
-Class includes helper methods to paginate through the list of `Resource` objects. The example below 
-shows how to retrieve events of a specific calendar with the current page. Then, it will paginate 
-for additional resources using `hasNextPage()` and `getNextPage()`.
+The Kloudless API supports pagination when a list of resources is returned. the `ResourceList` 
+Class includes helper methods to paginate through the list of `Resource` objects. The following 
+example below shows how to retrieve events of a specific calendar with the current page. 
+It will then paginate for additional resources using `hasNextPage()` and `getNextPage()`.
 
 ```java
 ResourceList eventList = (ResourceList) account.get("cal/calendars/" + calendarId + "/events");
@@ -293,9 +303,9 @@ if(eventList.hasNextPage()){
 }
 ```
 
-#### Autopagination of ResourceList
+#### ResourceList Auto-pagination
 
-The `ResourceList` class also supports autopagination to allow you to iterate over all resources. 
+The `ResourceList` class also supports auto-pagination to allow you to iterate over all resources. 
 The example below shows how to use the `ResourceList` `Iterator`.
 
 ```java
@@ -307,8 +317,8 @@ while (resourceIterator.hasNext()) {
 }
 ```
 
-Moreover, the autopagination Iterator can set a limit on the number of resources traversed. The 
-example below shows how to iterate over this subset.
+The auto-pagination iterator can also be set with a limit on the number of resources traversed. 
+The following example shows how to iterate over this subset.
 
 ```java
 ResourceList eventList = (ResourceList) account.get("cal/calendars/" + calendarId + "/events");
@@ -336,11 +346,11 @@ try (InputStream inputStream = httpResponse.getEntity().getContent()) {
 }
 ```
 
-## Other usage of Account 
+## Other Usages of Account 
 
-We have provided some examples to use the `get` helper method to make API requests directly to the 
+Below are more examples on how to use the `get` helper method to make API requests directly to the 
 Kloudless API Server. However, the Account class also supports other HTTP methods, such as `post`, 
-`put`, `patch`, and `delete`. We've included some examples below.
+`put`, `patch`, and `delete`.
 
 ```java
 //Use account to create a new calendar
@@ -359,9 +369,9 @@ Resource modifiedCalendar = account.patch("cal/calendars/" + calendarId, updateC
 account.delete("cal/calendars/" + calendarId);
 ```
 
-In addition, you can use the Account object to create resources with the `post` helper method.  In 
-the example below, we create a file type `Resource` object with the `name` and `parent_id` metadata 
-set in the header of the HTTP request.
+You can also use the Account object to create resources with the `post` helper method. In 
+the example below, a file typed `Resource` object with the `name` and `parent_id` metadata 
+set in the header of the HTTP request is created.
 
 ```java
 File newFile = new File("PATH OF LOCAL FILE");
@@ -376,9 +386,9 @@ Resource file = (Resource) account.post("storage/files?overwrite=false", headers
 
 ### Pass-through API
 
-You can use the Pass-through API to make HTTP requests directly to the upstream service for any 
-endpoints unsupported by the Kloudless API. Please note that a raw HttpResponse object is returned 
-by the SDK.
+It is possible use the Pass-through API to make HTTP requests directly to the upstream service 
+for any endpoints unsupported by the Kloudless API. Please note that a raw HttpResponse object 
+will be returned by the SDK.
 
 ```java
 HttpResponse driveInfo = account.raw("GET", "/drive/v2/about", null, null);
@@ -387,6 +397,6 @@ HttpResponse driveInfo = account.raw("GET", "/drive/v2/about", null, null);
 
 # Build
 
-* You can create the jar, skipping tests, with `gradle build -x test`.
-* You can create a jar and install it to the local maven repository with `gradle install`
+* You can create the JAR, skipping tests, with `gradle build -x test`.
+* You can create a JAR and install it to the local maven repository with `gradle install`
 
