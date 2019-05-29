@@ -1,0 +1,8 @@
+signing.keyId=KEYID_KEY
+signing.password=PASSWORD_OF_GPG_KEY
+signing.secretKeyRingFile=EXPORT_FILE_OF_GPG_KEY
+
+ossrhUsername = ACCOUNT_NAME_OF_SONATYPE
+ossrhPassword = PASSWORD_SONATYPE
+
+
