@@ -10,7 +10,6 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
     id 'maven'
-    id 'maven-publish'
     id 'signing'
     id 'java'
 }
@@ -49,6 +48,70 @@ file("src/main/resources/app.properties").withInputStream {
 }
 version = props.getProperty("version")
 group = 'com.kloudless'
+archivesBaseName = "kloudless-java"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'kloudless-java'
+        packaging 'jar'
+        description 'The Kloudless Java SDK allows developers to code once and integrate several \
+        cloud services.'
+        url 'https://kloudless.com'
+
+        scm {
+          connection 'scm:git:https://github.com/Kloudless/kloudless-java.git'
+          developerConnection 'scm:git:git@github.com:Kloudless/kloudless-java.git'
+          url 'https://github.com/Kloudless/kloudless-java'
+        }
+
+        licenses {
+          license {
+            name 'The MIT License (MIT)'
+            url 'https://github.com/Kloudless/kloudless-java/blob/master/LICENSE'
+          }
+        }
+
+        developers {
+          developer {
+            id 'kloudless'
+            name 'Kloudless Team'
+            email 'hello@kloudless.com'
+          }
+        }
+      }
+    }
+  }
+}
