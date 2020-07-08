@@ -28,6 +28,7 @@ You can sign up for a Kloudless Developer account at https://kloudless.com.
         * [ResourceList](#resourcelist)
             * [ResourceList Pagination](#resourcelist-pagination)
             * [ResourceList Auto-pagination](#resourcelist-auto-pagination)
+        * [ResponseJson](#responsejson)
         * [ResponseRaw](#responseraw)
     * [Other Usages of Account](#other-usages-of-account)
         * [Pass-through API](#pass-through-api)
@@ -328,6 +329,11 @@ while (resourceIterator.hasNext()) {
         System.out.println(resource.getData().get("name").getAsString());
 }
 ```
+
+### ResponseJson
+
+The Kloudless API may return a JSON response that the SDK cannot parse into a `Resource` or
+`ResourceList` instance. Please treat them similarly as you would a `JsonObject` instance.
 
 ### ResponseRaw 
 
