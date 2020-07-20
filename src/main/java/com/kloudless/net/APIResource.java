@@ -236,36 +236,45 @@ public abstract class APIResource extends KloudlessObject {
 		return conn;
 	}
 
-	private static void allowPatchCommand(java.net.HttpURLConnection conn) {
-    Object target = null;
-    try {
-		  if(conn instanceof HttpsURLConnectionImpl) {
-		    final Field delegate = HttpsURLConnectionImpl.class.getDeclaredField("delegate");
-		    delegate.setAccessible(true);
-		    target = delegate.get(conn);
-      } else {
-		    target = conn;
-      }
+	private static void usePatchMethod(java.net.HttpURLConnection conn) throws java.net.ProtocolException {
+		try {
+			conn.setRequestMethod("PATCH");
+		} catch (java.net.ProtocolException e) {
+			Object target = null;
+			
+		    try {
+		    	if (conn instanceof HttpsURLConnectionImpl) {
+				    final Field delegate = HttpsURLConnectionImpl.class.getDeclaredField("delegate");
+				    delegate.setAccessible(true);
+				    target = delegate.get(conn);
+		    	} else {
+				    target = conn;
+		    	}
 
-      final Field f = HttpURLConnection.class.getDeclaredField("methods");
-		  f.setAccessible(true);
-		  int last = 6; // index 6 is TRACE
-		  //TODO: temp solution to replace trace with patch
-      ((String[])f.get(target))[last] = "PATCH";
-    } catch (NoSuchFieldException | IllegalAccessException e) {
-      //TODO: log
-      e.printStackTrace();
-    }
-  }
+		    	final Field f = HttpURLConnection.class.getDeclaredField("methods");
+				f.setAccessible(true);
+				int last = 6; // index 6 is TRACE
+				
+				// XXX: temp solution to replace trace with patch
+				((String[])f.get(target))[last] = "PATCH";
+				
+				// set PATCH method again
+				conn.setRequestMethod("PATCH");
+		    } catch (NoSuchFieldException | IllegalAccessException e2) {
+		    	// TODO: log
+		    	e.printStackTrace();
+		    }
+		}
+	}
 
 	private static java.net.HttpURLConnection createPatchConnection(
 			String url, Map<String, Object> params, String query, Map<String, String> keys)
 			throws IOException {
 		java.net.HttpURLConnection conn = createKloudlessConnection(url,
 				keys);
-		allowPatchCommand(conn);
+		usePatchMethod(conn);
 		conn.setDoOutput(true);
-		conn.setRequestMethod("PATCH");
+		
 		conn.setRequestProperty("Content-Type", "application/json");
 		OutputStream output = null;
 		try {
