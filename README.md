@@ -337,14 +337,16 @@ The Kloudless API may return a JSON response that the SDK cannot parse into a `R
 
 ### ResponseRaw 
 
-For handling different content types other than JSON, such as binary data, the SDK provides a third 
-type of Resource Class named `ResponseRaw`.  `ResponseRaw` inherits from the `HttpResponse` class.
+For handling different content types other than JSON, such as binary data, the SDK provides a 
+separate method `getBinary` as well as a third type of Resource Class named `ResponseRaw`.
+`ResponseRaw` inherits from the `HttpResponse` class.
 
 ```java
 Resource fileMeta = (Resource) account.get("storage/files/" + fileId);
 System.out.println("Get file meta " + fileMeta.getData().toString());
 
-ResponseRaw responseRaw = (ResponseRaw) account.get("storage/files/" + fileId + "/contents");
+ResponseRaw responseRaw = account.getBinary(
+    "storage/files/" + fileId + "/contents");
 System.out.println(ContentType.get(responseRaw.getData().getEntity())
 HttpResponse httpResponse = responseRaw.getData();
 try (InputStream inputStream = httpResponse.getEntity().getContent()) {
