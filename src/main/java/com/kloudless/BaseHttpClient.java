@@ -102,6 +102,30 @@ public abstract class BaseHttpClient {
     }
 
     /**
+     * Http GET method for download
+     *
+     * @param url     URL of a Kloudless API endpoint
+     * @return ResponseRaw  A ResponseRaw instance
+     * @throws ApiException An error if the response status code isn't 2xx
+     */
+    public ResponseRaw getBinary(String url) throws ApiException {
+        return getBinary(url, null);
+    }
+
+    /**
+     * Http GET method for download
+     *
+     * @param url     URL of a Kloudless API endpoint
+     * @param headers Additional headers for the request
+     * @return ResponseRaw  A ResponseRaw instance
+     * @throws ApiException An error if the response status code isn't 2xx
+     */
+    public ResponseRaw getBinary(String url, Map<String, Object> headers) throws ApiException {
+        return (ResponseRaw) runHttpTransaction(
+                "GET", url, "Json", headers, null, false);
+    }
+
+    /**
      * Http POST method
      * 
      * @param url     URL of API supported by Kloudless API server.
@@ -257,35 +281,55 @@ public abstract class BaseHttpClient {
     }
 
     /**
-     * This method find the proper rawExecute method and dispatch
-     * 
-     * @param method  the Http method
-     * @param url     the url string
-     * @param format  String should be Json, File or Form
-     * @param headers the key, value pairs of http headers
-     * @param content the key, value pairs of http body
-     * @return ResponseBase The object extends from ResponseBase
-     * @throws ApiException Error if call API server failed.
+     * This method finds the proper rawExecute method and dispatches the request
+     *
+     * @param method  the HTTP method
+     * @param url     the URL string
+     * @param format  String should be one of Json, File or Form
+     * @param headers the key-value pairs of the request headers
+     * @param content the key-value pairs of the request body
+     * @return ResponseBase A ResponseBase instance
+     * @throws ApiException Error if the request failed
      */
-    private ResponseBase runHttpTransaction(String method, String url, String format,
-            Map<String, Object> headers, Object content) throws ApiException {
+    private ResponseBase runHttpTransaction(
+            String method, String url, String format, Map<String, Object> headers,
+            Object content) throws ApiException {
+        return runHttpTransaction(method, url, format, headers, content, true);
+    }
+
+    /**
+     * This method finds the proper rawExecute method and dispatches the request
+     *
+     * @param method  the HTTP method
+     * @param url     the URL string
+     * @param format  String should be one of Json, File or Form
+     * @param headers the key-value pairs of the request headers
+     * @param content the key-value pairs of the request body
+     * @param tryJson whether to try parsing the response body as a JSON object
+     * @return ResponseBase A ResponseBase instance
+     * @throws ApiException Error if the request failed
+     */
+    private ResponseBase runHttpTransaction(
+            String method, String url, String format, Map<String, Object> headers,
+            Object content, Boolean tryJson) throws ApiException {
         url = assembleUrl(url);
         headers = mergeHeaders(headers);
         format = format.toUpperCase();
+        HttpResponse httpResponse;
         switch (format) {
             case "JSON":
-                return responseFactory(rawJsonExecute(method, url, headers, content), url, headers,
-                        method);
+                httpResponse = rawJsonExecute(method, url, headers, content);
+                break;
             case "FORM":
-                return responseFactory(rawFormExecute(method, url, headers, content), url, headers,
-                        method);
+                httpResponse = rawFormExecute(method, url, headers, content);
+                break;
             case "FILE":
-                return responseFactory(rawFileExecute(method, url, headers, content), url, headers,
-                        method);
+                httpResponse = rawFileExecute(method, url, headers, content);
+                break;
             default:
                 throw new IllegalArgumentException("Invalid HTTP method: " + format);
         }
-
+        return responseFactory(httpResponse, url, headers, method, tryJson);
     }
 
     /**
@@ -551,18 +595,21 @@ public abstract class BaseHttpClient {
 
     /**
      * Response object factory generates Resource/ResourceList/ResponseRaw object
-     * 
+     *
      * @param response httpResponse object
      * @param url      the url string of current http request
      * @param headers  the key value pairs of current http headers
      * @param method   the http method
+     * @param tryJson  whether to try parse the response body as a JSON object
      * @return ResponseBase object, could be ResponseRaw, Resource, or ResourceList depends on the
      *         JsonObject type from API Server
      * @throws ApiException Errors when trandfer to ResponseBase object
      */
-    private ResponseBase responseFactory(HttpResponse response, String url,
-            Map<String, Object> headers, String method) throws ApiException {
+    private ResponseBase responseFactory(
+            HttpResponse response, String url, Map<String, Object> headers, String method,
+            Boolean tryJson) throws ApiException {
         if (response != null && response.getEntity() != null
+                && tryJson
                 && ContentType.get(response.getEntity()).toString()
                         .equals(ContentType.APPLICATION_JSON.getMimeType())) {
             try {
